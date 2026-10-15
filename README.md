@@ -28,7 +28,8 @@ code at request time.
 | `pipeline/faa_registry.py` | FAA Releasable Aircraft DB (317k aircraft) → privacy filter → 224 hex shards + 6,476 N-number shards + per-model age histograms | GitHub Actions |
 | `pipeline/history_etl.py` | Streams yesterday's ~4 GB ADSB.lol archive straight into `tarfile`, segments ~34k US aircraft tracks into flights, merges a rolling 30 days into ≤3,600 shards | GitHub Actions (~2.5 min locally) |
 | `pipeline/quality.py`, `spot_check.py` | Daily data-quality report and route spot check | GitHub Actions |
-| `worker/` | API: resolve input → hex, live state, siblings count + 7-day trend, routes; cron every 10 min counts 40 airliner types into D1 | Cloudflare Worker + the same code as a Pages Function |
+| `pipeline/live_snapshot.py` | Every ~10 min: one combined ADSB.lol request for the 40 tracked airliner types (~7,000 aircraft) → 64 D1 buckets + type counts | GitHub Actions (`live.yml`, ~30 s) |
+| `worker/` | API: resolve input → hex, live state, siblings count + 7-day trend, routes; reads the live snapshot from D1 first | Cloudflare Worker + the same code as a Pages Function |
 | `web/` | React app, mobile first, 87 KB gzipped JS, MapLibre lazy-loaded | Cloudflare Pages |
 
 A lookup: the browser calls `/api/resolve?q=DL1234`, which maps `DL` → `DAL` and asks ADSB.lol for `DAL1234`
@@ -36,6 +37,14 @@ A lookup: the browser calls `/api/resolve?q=DL1234`, which maps `DL` → `DAL` a
 shard `/data/reg/hex/A5C.json`, the history shard `/data/hist/A5CF.json`, `/api/live/{hex}`,
 `/api/siblings/{type}`, `/api/route/{callsign}`, and the Planespotters photo (directly, per their terms). Every card
 section loads and fails independently.
+
+### Why live data comes from GitHub Actions
+
+ADSB.lol answers `429` (and adsb.fi `403`) to nearly every request from Cloudflare's shared egress IPs, while a
+single combined `/v2/type/A319,A320,…` request works from a GitHub runner. So `live.yml` snapshots every tracked
+airliner into D1 about every 10 minutes (32 hex + 32 callsign buckets, ~105 row writes per run), and the API answers
+flight-number search, "Right now" and sibling counts from it, labelling each value with the snapshot time.
+Aircraft outside those 40 types fall back to a direct live call, which may be refused.
 
 ### Why the API runs twice
 

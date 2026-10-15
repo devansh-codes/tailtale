@@ -110,8 +110,12 @@
   Site rebuild on a cold runner mirrored all 10,276 data files from the live site with 0 failures.
 - Fixes found in production: the cron work moved out of `ctx.waitUntil` (30 s cap); a registry hit no longer fails
   when live data is unavailable; adsb.fi added as a fallback live provider.
-- **Open issue:** ADSB.lol answers 429 and adsb.fi answers 403 to most requests from Cloudflare's egress IPs, so
-  flight-number search, "Right now" and sibling counts are mostly unavailable in production. Proposed fix:
-  fetch a live airliner snapshot from GitHub Actions every ~10 min into D1.
+- ADSB.lol answers 429 and adsb.fi 403 to most requests from Cloudflare's egress IPs. **Fixed** with
+  `.github/workflows/live.yml` + `pipeline/live_snapshot.py`: one combined `/v2/type` request for the 40 tracked types
+  every ~10 min from GitHub Actions (≈7,000 aircraft, ~30 s per run), written to D1 (`live_bucket`, `type_counts`).
+  The API reads it first. Verified live: DL7 → N569DZ A350 (LAX→HND, 30,000 ft), AA175, F945, UA121, WN4222,
+  B6297, AS300, and DL4943 → SkyWest SKW4943 (partner match); siblings 995 airborne B738s across all 40 types.
+  Trade-offs: live values are up to ~10–30 min old (labelled on the page); aircraft outside the 40 types rely on a
+  direct live call that may be refused. The Worker's own cron triggers are retired.
 - Redesign to a cream / serif / lavender look (EB Garamond + Figtree, self-hosted). Lighthouse mobile:
   home 98, plane page 90–91 (LCP is the Planespotters photo, which may not be proxied), accessibility 100, CLS 0.002.
