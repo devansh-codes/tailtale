@@ -1,0 +1,22 @@
+name = "tailtale-api"
+main = "src/index.ts"
+compatibility_date = "2026-10-15"
+workers_dev = true
+
+[vars]
+PAGES_ORIGIN = "https://tailtale.pages.dev"
+REPO_URL = "https://github.com/devansh-codes/tailtale"
+EXTRA_ORIGINS = "http://localhost:5173,http://127.0.0.1:5173"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tailtale"
+database_id = "00000000-0000-0000-0000-000000000000" # replaced by scripts/setup-cloudflare.sh
+migrations_dir = "migrations"
+
+[triggers]
+# Four groups of tracked types, one minute apart, each every 10 minutes (10 ms CPU per invocation).
+crons = ["0-59/10 * * * *", "1-59/10 * * * *", "2-59/10 * * * *", "3-59/10 * * * *"]
+
+[observability]
+enabled = true

@@ -1,0 +1,29 @@
+# Generated data is never committed: the deployed site is the data store.
+out/
+web/public/data
+web/dist/
+web/test-results/
+web/playwright-report/
+pipeline/tests/.pytest_cache/
+
+# Tooling
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.coverage
+.wrangler/
+.dev.vars
+.DS_Store
+*.log
+.ipynb_checkpoints/
+
+# Never commit secrets or key files
+.env
+.env.*
+keys/
+credentials.json
+*.p8
+*.pem

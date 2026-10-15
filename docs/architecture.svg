@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="13">
+  <title>TailTale architecture</title>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#52514e"/>
+    </marker>
+    <style>
+      .box{fill:#ffffff;stroke:#c3c2b7;stroke-width:1.2}
+      .src{fill:#f0f2f5;stroke:#c3c2b7}
+      .cf{fill:#eef5fd;stroke:#2a78d6;stroke-width:1.2}
+      .gh{fill:#f6f7f9;stroke:#52514e;stroke-width:1.2}
+      .h{font-weight:700;fill:#0b0b0b}
+      .t{fill:#52514e}
+      .s{fill:#898781;font-size:11px}
+      .l{stroke:#52514e;stroke-width:1.4;fill:none;marker-end:url(#a)}
+      .d{stroke:#2a78d6;stroke-width:1.4;fill:none;stroke-dasharray:5 4;marker-end:url(#a)}
+    </style>
+  </defs>
+  <rect width="960" height="560" fill="#fcfcfb"/>
+
+  <!-- sources -->
+  <text x="24" y="34" class="h">Free, keyless sources</text>
+  <rect x="24" y="48" width="196" height="54" rx="10" class="src"/><text x="36" y="70" class="h">FAA registry zip</text><text x="36" y="88" class="s">daily, ~73 MB, 317k aircraft</text>
+  <rect x="24" y="114" width="196" height="54" rx="10" class="src"/><text x="36" y="136" class="h">ADSB.lol history</text><text x="36" y="154" class="s">GitHub release, ~4 GB/day, ODbL</text>
+  <rect x="24" y="180" width="196" height="54" rx="10" class="src"/><text x="36" y="202" class="h">OurAirports · OpenFlights</text><text x="36" y="220" class="s">airport subset, airline codes</text>
+  <rect x="24" y="300" width="196" height="54" rx="10" class="src"/><text x="36" y="322" class="h">ADSB.lol live API</text><text x="36" y="340" class="s">/v2/hex, callsign, reg, type</text>
+  <rect x="24" y="366" width="196" height="54" rx="10" class="src"/><text x="36" y="388" class="h">adsbdb</text><text x="36" y="406" class="s">routes, foreign aircraft</text>
+  <rect x="24" y="460" width="196" height="54" rx="10" class="src"/><text x="36" y="482" class="h">Planespotters · OpenFreeMap</text><text x="36" y="500" class="s">photos, map tiles (browser only)</text>
+
+  <!-- GitHub Actions -->
+  <rect x="270" y="40" width="300" height="210" rx="14" class="gh"/>
+  <text x="286" y="64" class="h">GitHub Actions · daily 09:00 UTC</text>
+  <text x="286" y="88" class="t">faa_registry.py → privacy filter → shards</text>
+  <text x="286" y="110" class="t">history_etl.py: stream tar → process pool</text>
+  <text x="300" y="128" class="s">segment flights, KD-tree airports, 30-day merge</text>
+  <text x="286" y="150" class="t">quality.py · spot_check.py</text>
+  <text x="286" y="172" class="t">manifest, limits check, vite build</text>
+  <text x="286" y="194" class="t">wrangler pages deploy</text>
+  <text x="286" y="222" class="s">failure → redeploy yesterday's data</text>
+  <text x="286" y="238" class="s">(Actions cache, else mirror of live site)</text>
+
+  <path d="M220 75 H262" class="l"/>
+  <path d="M220 141 H262" class="l"/>
+  <path d="M220 207 H262" class="l"/>
+
+  <!-- Cloudflare -->
+  <rect x="620" y="40" width="316" height="224" rx="14" class="cf"/>
+  <text x="636" y="64" class="h">Cloudflare Pages · *.pages.dev</text>
+  <text x="636" y="88" class="t">static site (React, 87 KB gz JS)</text>
+  <text x="636" y="110" class="t">/data: ~10k JSON shards</text>
+  <text x="650" y="128" class="s">reg/hex (224) · reg/n (6.5k) · hist (≤3.6k)</text>
+  <text x="650" y="144" class="s">stats · quality · ref · manifest</text>
+  <text x="636" y="170" class="t">/api/* Pages Function</text>
+  <text x="650" y="188" class="s">same code as the Worker; Cache API works here</text>
+  <text x="636" y="214" class="t">D1 binding (read)</text>
+  <text x="636" y="240" class="s">CDN gzip/brotli · no R2 · $0</text>
+
+  <path d="M570 145 H612" class="l"/>
+
+  <rect x="620" y="300" width="316" height="120" rx="14" class="cf"/>
+  <text x="636" y="324" class="h">Worker · *.workers.dev</text>
+  <text x="636" y="348" class="t">same API + 4 cron triggers / 10 min</text>
+  <text x="650" y="366" class="s">40 airliner types, streamed counts (10 ms CPU)</text>
+  <text x="636" y="392" class="t">D1: type_counts (≈30k rows written/day)</text>
+  <text x="650" y="410" class="s">8-day retention, indexed (type, ts)</text>
+
+  <rect x="270" y="300" width="300" height="120" rx="14" class="box"/>
+  <text x="286" y="324" class="h">Provider interface</text>
+  <text x="286" y="348" class="t">ADSB.lol behind one interface</text>
+  <text x="286" y="370" class="t">identifying User-Agent, 429 back-off</text>
+  <text x="286" y="392" class="t">one request per user action</text>
+
+  <path d="M220 327 H262" class="l"/>
+  <path d="M220 393 H262" class="l"/>
+  <path d="M570 360 H612" class="l"/>
+  <path d="M778 300 V272" class="l"/><text x="786" y="290" class="s">shared D1</text>
+
+  <!-- browser -->
+  <rect x="620" y="452" width="316" height="84" rx="14" class="box"/>
+  <text x="636" y="476" class="h">Phone at the gate</text>
+  <text x="636" y="500" class="t">/p/{hex}: shards + /api in parallel</text>
+  <text x="636" y="522" class="s">photo + tiles fetched directly from their hosts</text>
+  <path d="M620 494 H598 V232 H612" class="d"/>
+  <path d="M220 487 H612" class="d"/>
+</svg>

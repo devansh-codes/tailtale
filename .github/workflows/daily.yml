@@ -1,0 +1,153 @@
+name: Daily data + deploy
+
+on:
+  schedule:
+    - cron: "0 9 * * *" # 09:00 UTC; the ADSB.lol prod release for yesterday lands around 03:30 UTC
+  workflow_dispatch:
+    inputs:
+      day:
+        description: "UTC day to process, YYYY-MM-DD (default: yesterday)"
+        required: false
+      backfill:
+        description: "Number of days to process, ending at 'day' (oldest first)"
+        required: false
+        default: "1"
+      skip_etl:
+        description: "Only rebuild and redeploy the site with the current data"
+        type: boolean
+        default: false
+      simulate_failure:
+        description: "Point every upstream at a dead URL to prove yesterday's data is kept"
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+    paths: ["web/**", "worker/src/**", ".github/workflows/daily.yml"]
+
+concurrency:
+  group: daily
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  TAILTALE_SITE_URL: ${{ vars.TAILTALE_SITE_URL || 'https://tailtale.pages.dev' }}
+  TAILTALE_REPO_URL: https://github.com/${{ github.repository }}
+  TAILTALE_OUT: ${{ github.workspace }}/out/data
+  TAILTALE_CACHE: ${{ github.workspace }}/out/cache
+  PAGES_PROJECT: ${{ vars.PAGES_PROJECT || 'tailtale' }}
+  RUN_ETL: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.skip_etl) }}
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: uv sync --locked
+        working-directory: pipeline
+
+      # The deployed site is the data store. Start from the last deployed data: the Actions cache saved by the
+      # previous successful run, or (cache evicted) a mirror of the live site.
+      - name: Restore last deployed data
+        id: restore
+        uses: actions/cache/restore@v4
+        with:
+          path: out/data
+          key: data-${{ github.run_id }}
+          restore-keys: data-
+      - name: Mirror live site data (cache miss)
+        if: steps.restore.outputs.cache-matched-key == ''
+        working-directory: pipeline
+        run: uv run python deploy_data.py mirror
+
+      - name: Simulate upstream outage
+        if: inputs.simulate_failure
+        run: |
+          {
+            echo "TAILTALE_FAA_URL=https://registry.faa.gov/database/does-not-exist.zip"
+            echo "TAILTALE_FAA_PAGE=https://www.faa.gov/does-not-exist"
+            echo "HIST_DAY=1999-01-01"
+          } >> "$GITHUB_ENV"
+
+      - name: FAA registry
+        id: faa
+        if: env.RUN_ETL == 'true'
+        continue-on-error: true
+        working-directory: pipeline
+        run: uv run python faa_registry.py
+
+      - name: History ETL
+        id: hist
+        if: env.RUN_ETL == 'true'
+        continue-on-error: true
+        working-directory: pipeline
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DAY_INPUT: ${{ inputs.day }}
+          BACKFILL: ${{ inputs.backfill || '1' }}
+        run: |
+          DAY="${HIST_DAY:-$DAY_INPUT}"
+          uv run python history_etl.py ${DAY:+--day "$DAY"} --backfill "$BACKFILL"
+
+      - name: Data quality report
+        if: env.RUN_ETL == 'true'
+        working-directory: pipeline
+        env:
+          DAY_INPUT: ${{ inputs.day }}
+        run: uv run python quality.py ${DAY_INPUT:+--day "$DAY_INPUT"}
+
+      - name: Route spot check
+        if: env.RUN_ETL == 'true' && steps.hist.outcome == 'success'
+        continue-on-error: true
+        working-directory: pipeline
+        run: uv run python spot_check.py --hist "$TAILTALE_OUT/hist" --n 10 --out "$TAILTALE_OUT/quality/spot_check.json"
+
+      - name: Refuse to publish without a registry
+        run: |
+          n=$(find out/data/reg/hex -name '*.json' 2>/dev/null | wc -l)
+          echo "registry shards: $n"
+          test "$n" -ge 200
+
+      - name: Build site
+        working-directory: pipeline
+        run: |
+          uv run python deploy_data.py manifest
+          rm -rf ../web/public/data && cp -r "$TAILTALE_OUT" ../web/public/data
+      - run: npm ci
+        working-directory: web
+      - run: npm run build
+        working-directory: web
+        env:
+          VITE_REPO_URL: ${{ env.TAILTALE_REPO_URL }}
+      - name: Check Cloudflare Pages limits (< 19,000 files, each < 24 MiB)
+        working-directory: pipeline
+        run: uv run python deploy_data.py validate ../web/dist
+
+      - name: Deploy to Cloudflare Pages
+        working-directory: web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler pages deploy dist --project-name "$PAGES_PROJECT" --branch main --commit-hash "$GITHUB_SHA" --commit-message "daily ${{ github.run_id }}" --commit-dirty=true
+
+      - name: Save deployed data for tomorrow
+        uses: actions/cache/save@v4
+        with:
+          path: out/data
+          key: data-${{ github.run_id }}
+
+      - name: Report ETL failures
+        if: steps.faa.outcome == 'failure' || steps.hist.outcome == 'failure'
+        run: |
+          echo "::error::FAA=${{ steps.faa.outcome }} history=${{ steps.hist.outcome }}. The site was redeployed with the previous data."
+          exit 1

@@ -1,0 +1,13 @@
+# Cloudflare Pages project (static site + /api Pages Function). Deployed with `wrangler pages deploy dist`.
+name = "tailtale"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-10-15"
+
+[vars]
+PAGES_ORIGIN = "https://tailtale.pages.dev"
+REPO_URL = "https://github.com/devansh-codes/tailtale"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tailtale"
+database_id = "00000000-0000-0000-0000-000000000000" # replaced by scripts/setup-cloudflare.sh

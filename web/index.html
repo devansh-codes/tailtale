@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>TailTale: the life story of the plane you're on</title>
+    <meta name="description" content="Type a flight number, tail number or transponder hex and get the story of that exact airframe: age, owner, where it has been this month, and how many of its siblings are flying right now." />
+    <meta name="theme-color" content="#0b2545" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)" />
+    <meta property="og:title" content="TailTale" />
+    <meta property="og:description" content="The life story of the plane you're sitting in." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://api.planespotters.net" crossorigin />
+    <script>
+      try { var t = localStorage.getItem("tt-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>TailTale needs JavaScript to look up aircraft.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

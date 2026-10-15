@@ -1,0 +1,9 @@
+{"ac":[
+{"hex":"aaf29f","type":"adsb_icao","r":"N804VL","t":"B738","dbFlags":8,"alt_baro":38000,"alt_geom":40500,"gs":456.3,"baro_rate":0,"emergency":"none","category":"A3","nav_qnh":1013.6,"nav_altitude_mcp":38016,"nic":8,"rc":186,"seen_pos":0.273,"version":2,"nic_baro":1,"nac_p":10,"nac_v":2,"sil":3,"sil_type":"perhour","gva":2,"sda":2,"alert":0,"spi":0,"mlat":[],"tisb":[],"messages":41530,"seen":0.1,"rssi":-25.0}
+]
+,"msg": "No error"
+,"now": 1792073825501
+,"total": 1
+,"ctime": 1792073825501
+,"ptime": 0
+}

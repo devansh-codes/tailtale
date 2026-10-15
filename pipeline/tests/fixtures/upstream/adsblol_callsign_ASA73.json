@@ -1,0 +1,9 @@
+{"ac":[
+{"hex":"a7197d","type":"adsb_icao","flight":"ASA73   ","r":"N557AS","t":"B738","alt_baro":16250,"alt_geom":16175,"gs":401.9,"track":6.86,"baro_rate":0,"squawk":"4202","emergency":"none","category":"A3","lat":57.537821,"lon":-135.403393,"nic":8,"rc":186,"seen_pos":0.711,"version":2,"nic_baro":1,"nac_p":10,"nac_v":1,"sil":3,"sil_type":"perhour","gva":2,"sda":2,"alert":0,"spi":0,"mlat":[],"tisb":[],"messages":1977,"seen":0.5,"rssi":-24.4}
+]
+,"msg": "No error"
+,"now": 1792073823000
+,"total": 1
+,"ctime": 1792073823000
+,"ptime": 0
+}

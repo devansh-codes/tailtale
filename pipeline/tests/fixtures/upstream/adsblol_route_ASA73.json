@@ -1,0 +1,42 @@
+{
+    "callsign": "ASA73",
+    "number": "73",
+    "airline_code": "ASA",
+    "airport_codes": "PASI-PAJN-PANC",
+    "_airport_codes_iata": "SIT-JNU-ANC",
+    "_airports": [
+        {
+            "name": "Sitka Rocky Gutierrez Airport",
+            "icao": "PASI",
+            "iata": "SIT",
+            "location": "Sitka",
+            "countryiso2": "US",
+            "lat": 57.0471,
+            "lon": -135.362,
+            "alt_feet": 21.0,
+            "alt_meters": 6.4
+        },
+        {
+            "name": "Juneau International Airport",
+            "icao": "PAJN",
+            "iata": "JNU",
+            "location": "Juneau",
+            "countryiso2": "US",
+            "lat": 58.355,
+            "lon": -134.576004,
+            "alt_feet": 21.0,
+            "alt_meters": 6.4
+        },
+        {
+            "name": "Ted Stevens Anchorage International Airport",
+            "icao": "PANC",
+            "iata": "ANC",
+            "location": "Anchorage",
+            "countryiso2": "US",
+            "lat": 61.1744,
+            "lon": -149.996002,
+            "alt_feet": 152.0,
+            "alt_meters": 46.33
+        }
+    ]
+}
