@@ -1,0 +1,15 @@
+name: Probe upstream reachability
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ADSB.lol by-type from a GitHub runner
+        run: |
+          for t in B738 A320 A321 E75L B38M A20N CRJ9 B739 A319 B737; do
+            curl -s -o /tmp/b -w "$t %{http_code} %{size_download}B %{time_total}s\n" -A "TailTale/1.0 (+https://github.com/${{ github.repository }})" "https://api.adsb.lol/v2/type/$t"
+            sleep 2
+          done
+          curl -s -o /dev/null -w "multi %{http_code} %{size_download}B %{time_total}s\n" -A "TailTale/1.0" "https://api.adsb.lol/v2/type/A319,A320,A321,A20N,A21N"
