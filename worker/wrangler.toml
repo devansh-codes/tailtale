@@ -1,10 +1,10 @@
-name = "tailtale-api"
+name = "jetlog-api"
 main = "src/index.ts"
 compatibility_date = "2026-10-15"
 workers_dev = true
 
 [vars]
-PAGES_ORIGIN = "https://tailtale-50y.pages.dev"
+PAGES_ORIGIN = "https://jetlog.pages.dev"
 REPO_URL = "https://github.com/devansh-codes/tailtale"
 EXTRA_ORIGINS = "http://localhost:5173,http://127.0.0.1:5173"
 

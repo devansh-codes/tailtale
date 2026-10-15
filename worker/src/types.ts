@@ -2,7 +2,7 @@ export interface Env {
   DB?: D1Database;
   /** Present when running as a Pages Function: serves the static site and /data shards without a subrequest. */
   ASSETS?: Fetcher;
-  /** Origin of the static site, e.g. https://tailtale.pages.dev (used for /data fetches and CORS). */
+  /** Origin of the static site, e.g. https://jetlog.pages.dev (used for /data fetches and CORS). */
   PAGES_ORIGIN?: string;
   /** Extra comma-separated origins allowed by CORS (local development). */
   EXTRA_ORIGINS?: string;

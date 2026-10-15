@@ -1,4 +1,4 @@
-"""Shared helpers for the TailTale pipeline: paths, HTTP with backoff, JSON writing."""
+"""Shared helpers for the Jetlog pipeline: paths, HTTP with backoff, JSON writing."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from pathlib import Path
 import orjson
 
 REPO_URL = os.environ.get("TAILTALE_REPO_URL", "https://github.com/devansh-codes/tailtale")
-USER_AGENT = f"TailTale/1.0 (+{REPO_URL})"
+USER_AGENT = f"Jetlog/1.0 (+{REPO_URL})"
 BROWSER_UA = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36"
 )
@@ -21,7 +21,7 @@ BROWSER_UA = (
 ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = Path(os.environ.get("TAILTALE_OUT", ROOT / "out" / "data"))
 CACHE_DIR = Path(os.environ.get("TAILTALE_CACHE", ROOT / "out" / "cache"))
-SITE_URL = os.environ.get("TAILTALE_SITE_URL", "https://tailtale.pages.dev").rstrip("/")
+SITE_URL = os.environ.get("TAILTALE_SITE_URL", "https://jetlog.pages.dev").rstrip("/")
 
 # US civil ICAO 24-bit address block assigned to N-numbers.
 US_HEX_MIN = 0xA00001

@@ -1,4 +1,4 @@
-# TailTale
+# Jetlog
 
 **Tell me the life story of the plane I'm sitting in.**
 

@@ -11,7 +11,7 @@ const GAP_BINS = ["30-60", "60-120", "120-240", "240-480", "480+"];
 const dayX = (d: string) => Date.parse(d + "T00:00:00Z") / 1000;
 
 export function Quality() {
-  useTitle("Data quality | TailTale");
+  useTitle("Data quality | Jetlog");
   const hist = useLoad(() => api.quality(), []);
   const latest = useLoad(() => api.qualityLatest(), []);
   const spot = useLoad(() => api.spotCheck(), []);
@@ -23,7 +23,7 @@ export function Quality() {
     <div className="prose">
       <h1>Data quality</h1>
       <p>
-        TailTale's flight history is built from volunteer ADS-B receivers, so it has holes. This page shows, every day, how much we saw, how much we
+        Jetlog's flight history is built from volunteer ADS-B receivers, so it has holes. This page shows, every day, how much we saw, how much we
         could explain, and where we gave up instead of guessing. All numbers are for US-registered civil aircraft (hex A00001–ADF7C7), including
         general aviation.
       </p>
@@ -41,7 +41,7 @@ export function Quality() {
           <div className="kpis">
             <Stat label="Traces read" value={fmtInt(last.traces_read ?? 0)} source="ADSB.lol daily archive" />
             <Stat label="US aircraft" value={fmtInt(last.us_traces ?? 0)} source="hex A00001–ADF7C7" />
-            <Stat label="Flights found" value={fmtInt(last.segments ?? 0)} source="TailTale segmentation" />
+            <Stat label="Flights found" value={fmtInt(last.segments ?? 0)} source="Jetlog segmentation" />
             <Stat label="Opted out (LADD/PIA)" value={fmtInt(last.blocked ?? 0)} source="readsb dbFlags" />
             <Stat label="Both airports matched" value={pct(last.both_airports_share)} source="within 8 km" />
             <Stat label="Partly observed" value={pct(last.incomplete_share)} source="gap > 30 min or midnight" />

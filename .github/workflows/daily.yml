@@ -32,11 +32,11 @@ permissions:
   contents: read
 
 env:
-  TAILTALE_SITE_URL: ${{ vars.TAILTALE_SITE_URL || 'https://tailtale.pages.dev' }}
+  TAILTALE_SITE_URL: ${{ vars.TAILTALE_SITE_URL || 'https://jetlog.pages.dev' }}
   TAILTALE_REPO_URL: https://github.com/${{ github.repository }}
   TAILTALE_OUT: ${{ github.workspace }}/out/data
   TAILTALE_CACHE: ${{ github.workspace }}/out/cache
-  PAGES_PROJECT: ${{ vars.PAGES_PROJECT || 'tailtale' }}
+  PAGES_PROJECT: ${{ vars.PAGES_PROJECT || 'jetlog' }}
   RUN_ETL: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.skip_etl) }}
 
 jobs:

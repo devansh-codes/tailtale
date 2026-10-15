@@ -104,8 +104,8 @@
 - Privacy pass on committed fixtures: live positions/callsigns of LADD-flagged aircraft and the LADD trace were removed.
 
 ## Deploy + redesign (2026-10-15)
-- Live: https://tailtale-50y.pages.dev (Pages project `tailtale`; the bare name was taken globally) and
-  https://tailtale-api.chaudharydevansh2022.workers.dev. Repo: https://github.com/devansh-codes/tailtale.
+- Live: https://jetlog.pages.dev (Pages project `tailtale`; the bare name was taken globally) and
+  https://jetlog-api.chaudharydevansh2022.workers.dev. Repo: https://github.com/devansh-codes/tailtale.
 - First GitHub Actions ETL (7-day backfill) succeeded in 20 min; one full day takes ~103 s on the runner.
   Site rebuild on a cold runner mirrored all 10,276 data files from the live site with 0 failures.
 - Fixes found in production: the cron work moved out of `ctx.waitUntil` (30 s cap); a registry hit no longer fails

@@ -83,14 +83,14 @@ export function SearchBox({ initial = "", autoFocus = false }: { initial?: strin
 }
 
 export function Home() {
-  useTitle("TailTale: the life story of the plane you're on");
+  useTitle("Jetlog: the life story of the plane you're on");
   const sib = useLoad(() => api.allSiblings(), []);
   const top = sib.data ? Object.entries(sib.data.types).sort((a, b) => b[1] - a[1]).slice(0, 6) : [];
   const total = sib.data ? Object.values(sib.data.types).reduce((a, b) => a + b, 0) : 0;
   return (
     <>
       <section className="home-hero">
-        <p className="eyebrow">TailTale · airframe stories</p>
+        <p className="eyebrow">Jetlog · airframe stories</p>
         <h1 className="display">
           Every plane <em>has a story.</em>
         </h1>

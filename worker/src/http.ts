@@ -12,7 +12,7 @@ export class ApiError extends Error {
 }
 
 export function userAgent(env: Env): string {
-  return `TailTale/1.0 (+${env.REPO_URL ?? "https://github.com/devansh-codes/tailtale"})`;
+  return `Jetlog/1.0 (+${env.REPO_URL ?? "https://github.com/devansh-codes/tailtale"})`;
 }
 
 export function json(body: unknown, status = 200, maxAge = 0): Response {

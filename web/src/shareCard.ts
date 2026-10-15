@@ -45,7 +45,7 @@ export function drawCard(canvas: HTMLCanvasElement, d: CardData): void {
   c.fillStyle = "#f0d7ff";
   c.font = font(600, 32);
   c.letterSpacing = "6px";
-  c.fillText("TAILTALE · PLANE WRAPPED", 80, 120);
+  c.fillText("JETLOG · PLANE WRAPPED", 80, 120);
   c.letterSpacing = "0px";
 
   c.fillStyle = "#ffffeb";

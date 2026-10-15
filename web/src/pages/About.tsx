@@ -1,12 +1,12 @@
 import { Link, useTitle } from "../router";
 
 export function About() {
-  useTitle("About and data | TailTale");
+  useTitle("About and data | Jetlog");
   return (
     <article className="prose">
-      <h1>About TailTale</h1>
+      <h1>About Jetlog</h1>
       <p>
-        TailTale tells the story of one specific airframe: the plane you're sitting in. It joins three public sources: the live position broadcast by
+        Jetlog tells the story of one specific airframe: the plane you're sitting in. It joins three public sources: the live position broadcast by
         the aircraft's transponder, the FAA's aircraft registry, and a nightly-built 30-day flight history.
       </p>
 
@@ -89,7 +89,7 @@ export function About() {
 }
 
 export function NotFoundPage() {
-  useTitle("Not found | TailTale");
+  useTitle("Not found | Jetlog");
   return (
     <div className="prose">
       <h1>That page doesn't exist.</h1>

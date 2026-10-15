@@ -67,7 +67,7 @@ test("tail number lookup renders every section and the share card downloads", as
   // No horizontal scrolling at 360 px.
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
   const [dl] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Share card" }).click()]);
-  expect(dl.suggestedFilename()).toBe("tailtale-N47345.png");
+  expect(dl.suggestedFilename()).toBe("jetlog-N47345.png");
   const path = await dl.path();
   const fs = await import("node:fs");
   const buf = fs.readFileSync(path!);
@@ -97,7 +97,7 @@ test("LADD/PIA aircraft show type-level information only", async ({ page }) => {
 test("about and data quality pages load with the disclaimer", async ({ page }) => {
   await mock(page);
   await page.goto("/about");
-  await expect(page.getByRole("heading", { name: "About TailTale" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "About Jetlog" })).toBeVisible();
   await expect(page.getByText("ODbL 1.0").first()).toBeVisible();
   await page.goto("/quality");
   await expect(page.getByRole("heading", { name: "Data quality" })).toBeVisible();

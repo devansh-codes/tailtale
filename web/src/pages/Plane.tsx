@@ -58,7 +58,7 @@ export function Plane({ hex }: { hex: string }) {
   const needAirports = summary.airports.length > 0;
   const airports = useLoad(() => api.airports(), [needAirports], needAirports);
 
-  const title = registration ? `${registration}${plainType ? ` · ${plainType}` : ""} | TailTale` : "Aircraft | TailTale";
+  const title = registration ? `${registration}${plainType ? ` · ${plainType}` : ""} | Jetlog` : "Aircraft | Jetlog";
   useTitle(title);
 
   const notFound = us && !reg.loading && !reg.data && !live.loading && !live.data?.seen && !hist.loading && !hist.data && !info.loading && !info.data;
@@ -410,7 +410,7 @@ function Last30({ loading, summary, airports, hasData }: {
         tableHead={["Day (UTC)", "Flights"]}
       />
       <div className="stats" style={{ marginTop: 12 }}>
-        <Stat label="Flights" value={fmtInt(summary.flights)} source="ADSB.lol history, segmented by TailTale" />
+        <Stat label="Flights" value={fmtInt(summary.flights)} source="ADSB.lol history, segmented by Jetlog" />
         <Stat label="Hours in the air" value={summary.hours.toFixed(1)} source="ADSB.lol history" />
         <Stat
           label="Longest flight"
@@ -473,7 +473,7 @@ function ShareSection({ data, ready }: { data: CardData; ready: boolean }) {
             if (!ref.current) return;
             drawCard(ref.current, data);
             try {
-              const r = await shareOrDownload(ref.current, `tailtale-${data.reg}.png`, `${data.reg} on TailTale`, `https://${data.url}`);
+              const r = await shareOrDownload(ref.current, `jetlog-${data.reg}.png`, `${data.reg} on Jetlog`, `https://${data.url}`);
               setMsg(r === "downloaded" ? "Image downloaded." : r === "shared" ? "Shared!" : null);
             } catch (e) {
               setMsg((e as Error).message);

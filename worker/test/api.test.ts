@@ -8,7 +8,7 @@ import type { Env } from "../src/types";
 import { aircraft, ctx, FakeCache, FakeD1, FakeProvider, fixture, fixtureJson } from "./helpers";
 
 const ORIGIN = "https://tailtale.pages.dev";
-const UA = "TailTale/1.0 (+test)";
+const UA = "Jetlog/1.0 (+test)";
 
 function streamOf(text: string, chunk: number): ReadableStream<Uint8Array> {
   const bytes = new TextEncoder().encode(text);

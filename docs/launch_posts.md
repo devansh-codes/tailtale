@@ -6,18 +6,18 @@ Replace `<SITE>` with the live `*.pages.dev` URL and `<REPO>` with the GitHub UR
 
 ## Product Hunt
 
-**Name:** TailTale
+**Name:** Jetlog
 
 **Tagline (60 chars):** The life story of the exact plane you're sitting in
 
 **Description (260 chars):**
-Type your flight number or the tail number on the plane. TailTale shows that airframe's age, owner, where it flew
+Type your flight number or the tail number on the plane. Jetlog shows that airframe's age, owner, where it flew
 this month and how many of its siblings are airborne now, then makes you a shareable card. Free, open source, no
 sign-up.
 
 **First comment (maker):**
 
-Hi Product Hunt! I built TailTale because every time I board I wonder about the specific plane: is this 737 brand
+Hi Product Hunt! I built Jetlog because every time I board I wonder about the specific plane: is this 737 brand
 new or older than me? Where was it this morning?
 
 How it works:

@@ -1,6 +1,6 @@
 # Attribution and licenses
 
-TailTale combines the following sources. Thank you to everyone who runs a receiver, takes a photo, or maintains
+Jetlog combines the following sources. Thank you to everyone who runs a receiver, takes a photo, or maintains
 these datasets.
 
 | Source | Used for | License / terms |
@@ -18,7 +18,7 @@ these datasets.
 
 * **Flight history shards** (`/data/hist/*.json`, `/data/stats/daily.json`, `/data/quality/*`) are derived from
   ADSB.lol data and are published under the **Open Database License (ODbL) 1.0**. Any public use must attribute
-  ADSB.lol and TailTale and keep the ODbL.
+  ADSB.lol and Jetlog and keep the ODbL.
 * **Airline code map** (`worker/src/generated/airlines.json`) is derived from OpenFlights and is published under
   **ODbL 1.0**, with hand-curated overrides in `data/airline_overrides.json`.
 * **Registry shards** (`/data/reg/*`) are derived from public FAA data. Individual owners' names and every address
@@ -26,4 +26,4 @@ these datasets.
 
 ## Code
 
-The TailTale source code is MIT licensed (see `LICENSE`). Aircraft silhouettes are original drawings.
+The Jetlog source code is MIT licensed (see `LICENSE`). Aircraft silhouettes are original drawings.

@@ -59,9 +59,9 @@ export default function App() {
       </div>
       <div className="navwrap">
         <header className="nav">
-          <Link href="/" className="logo" aria-label="TailTale home">
+          <Link href="/" className="logo" aria-label="Jetlog home">
             <Mark />
-            TailTale
+            Jetlog
           </Link>
           <nav className="pills" aria-label="Sections">
             <Link href="/" aria-current={cur("/")}>
@@ -95,7 +95,7 @@ export default function App() {
       <main id="main">{page}</main>
       <footer className="footer">
         <div className="footer-inner">
-          <p className="wordmark">TailTale</p>
+          <p className="wordmark">Jetlog</p>
           <p>
             <strong>For curiosity only.</strong> Not for navigation, safety, or operational decisions. Data comes from volunteers and public records and can be
             wrong or delayed.
