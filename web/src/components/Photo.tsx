@@ -13,7 +13,7 @@ export function HeroPhoto({ photo, loading, kind, alt }: { photo: PhotoT | null;
       <div className="hero-media">
         {img && photo ? (
           <a href={photo.link} target="_blank" rel="noopener" aria-label={`Photo of ${alt} on Planespotters.net`}>
-            <img src={img.src} width={img.size.width} height={img.size.height} alt={`${alt}, photographed by ${photo.photographer}`} decoding="async" />
+            <img src={img.src} width={img.size.width} height={img.size.height} alt={`${alt}, photographed by ${photo.photographer}`} decoding="async" fetchPriority="high" />
           </a>
         ) : loading ? (
           <div className="sk" style={{ position: "absolute", inset: 0, borderRadius: 0 }} aria-hidden="true" />

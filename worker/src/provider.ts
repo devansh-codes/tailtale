@@ -175,7 +175,8 @@ export class FallbackProvider implements LiveProvider {
       try {
         return await f(this.secondary);
       } catch (e2) {
-        throw e2 instanceof ApiError && e2.code === "unsupported" ? e : e2;
+        // Both networks failed: report the primary's (rate-limit) reason, not the fallback's status code.
+        throw e2 instanceof ApiError ? e : e2;
       }
     }
   }

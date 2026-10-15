@@ -12,6 +12,9 @@ export interface CardData {
   url: string;
 }
 
+const SERIF = `"EB Garamond", Georgia, serif`;
+const SANS = `Figtree, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`;
+
 export const CARD_W = 1080;
 export const CARD_H = 1350;
 
@@ -24,17 +27,14 @@ export function drawCard(canvas: HTMLCanvasElement, d: CardData): void {
   canvas.height = CARD_H;
   const c = canvas.getContext("2d");
   if (!c) return;
-  const font = (w: number, px: number) => `${w} ${px}px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`;
+  const font = (w: number, px: number) => `${w} ${px}px ${SANS}`;
+  const serif = (w: number, px: number, italic = false) => `${italic ? "italic " : ""}${w} ${px}px ${SERIF}`;
 
-  const g = c.createLinearGradient(0, 0, 0, CARD_H);
-  g.addColorStop(0, "#0b2545");
-  g.addColorStop(0.55, "#13315c");
-  g.addColorStop(1, "#1c5cab");
-  c.fillStyle = g;
+  c.fillStyle = "#034f46";
   c.fillRect(0, 0, CARD_W, CARD_H);
 
   // subtle contrail arcs
-  c.strokeStyle = "rgba(255,255,255,0.07)";
+  c.strokeStyle = "rgba(255,255,235,0.07)";
   c.lineWidth = 3;
   for (let i = 0; i < 5; i++) {
     c.beginPath();
@@ -42,16 +42,16 @@ export function drawCard(canvas: HTMLCanvasElement, d: CardData): void {
     c.stroke();
   }
 
-  c.fillStyle = "#86b6ef";
-  c.font = font(700, 34);
+  c.fillStyle = "#f0d7ff";
+  c.font = font(600, 32);
+  c.letterSpacing = "6px";
   c.fillText("TAILTALE · PLANE WRAPPED", 80, 120);
+  c.letterSpacing = "0px";
 
-  c.fillStyle = "#ffffff";
-  c.font = font(800, 150);
-  fitText(c, d.reg, 80, 280, CARD_W - 160, 150, 800);
-  c.fillStyle = "#cde2fb";
-  c.font = font(600, 54);
-  fitText(c, d.type, 80, 360, CARD_W - 160, 54, 600);
+  c.fillStyle = "#ffffeb";
+  fitText(c, d.reg, 80, 285, CARD_W - 160, 168, serif(500, 168));
+  c.fillStyle = "rgba(255,255,235,0.85)";
+  fitText(c, d.type, 80, 365, CARD_W - 160, 60, serif(400, 60, true));
 
   // silhouette
   c.save();
@@ -59,7 +59,7 @@ export function drawCard(canvas: HTMLCanvasElement, d: CardData): void {
   const s = (CARD_W - 220) / 240;
   c.scale(s, s);
   for (const p of silhouette(d.kind)) {
-    c.fillStyle = p.ink ? "#ffffff" : "#13315c";
+    c.fillStyle = p.ink ? "#ffffeb" : "#034f46";
     c.globalAlpha = p.ink ? 0.95 : 1;
     c.fill(new Path2D(p.d));
   }
@@ -78,19 +78,21 @@ export function drawCard(canvas: HTMLCanvasElement, d: CardData): void {
   tiles.forEach(([v, l], i) => {
     const x = 80 + (i % 2) * (tw + 40);
     const y = top + Math.floor(i / 2) * (th + 30);
-    c.fillStyle = "rgba(255,255,255,0.09)";
+    c.fillStyle = "rgba(255,255,235,0.08)";
     roundRect(c, x, y, tw, th, 28);
     c.fill();
-    c.fillStyle = "#ffffff";
-    c.font = font(800, 84);
-    fitText(c, v, x + 32, y + 104, tw - 64, 84, 800);
-    c.fillStyle = "#b7d3f6";
+    c.strokeStyle = "rgba(255,255,235,0.18)";
+    c.lineWidth = 2;
+    c.stroke();
+    c.fillStyle = "#ffffeb";
+    fitText(c, v, x + 32, y + 104, tw - 64, 92, serif(500, 92));
+    c.fillStyle = "rgba(255,255,235,0.78)";
     c.font = font(500, 30);
     wrapText(c, l, x + 32, y + 148, tw - 64, 34);
   });
 
-  c.fillStyle = "#b7d3f6";
-  c.font = font(500, 30);
+  c.fillStyle = "#f0d7ff";
+  c.font = font(600, 30);
   c.fillText(d.url, 80, CARD_H - 70);
 }
 
@@ -104,12 +106,14 @@ function roundRect(c: CanvasRenderingContext2D, x: number, y: number, w: number,
   c.closePath();
 }
 
-function fitText(c: CanvasRenderingContext2D, t: string, x: number, y: number, max: number, px: number, w: number) {
+/** Shrinks the font size (keeping family/weight/style from `fontSpec`) until the text fits. */
+function fitText(c: CanvasRenderingContext2D, t: string, x: number, y: number, max: number, px: number, fontSpec: string) {
   let size = px;
-  c.font = `${w} ${size}px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`;
+  const at = (n: number) => fontSpec.replace(`${px}px`, `${n}px`);
+  c.font = at(size);
   while (c.measureText(t).width > max && size > 18) {
     size -= 4;
-    c.font = `${w} ${size}px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`;
+    c.font = at(size);
   }
   c.fillText(t, x, y);
 }

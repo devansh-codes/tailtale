@@ -90,30 +90,47 @@ export function Home() {
   return (
     <>
       <section className="home-hero">
-        <h1>Tell me the life story of the plane I'm sitting in.</h1>
-        <p className="sub" style={{ marginTop: 10 }}>
-          Type the flight number from your boarding pass, or the tail number painted on the plane. You'll get its age, its owner,
-          where it's been this month, and how many of its siblings are flying right now.
-        </p>
-        <SearchBox autoFocus={false} />
+        <p className="eyebrow">TailTale · airframe stories</p>
+        <h1 className="display">
+          Every plane <em>has a story.</em>
+        </h1>
+        <p className="lead">The flight number on your boarding pass or the tail number on the plane unlocks the life of the exact aircraft you're sitting in.</p>
+        <SearchBox />
       </section>
 
-      <Card title="Planes flying right now" busy={sib.loading}>
+      <section className="band" aria-labelledby="live-h" aria-busy={sib.loading || undefined}>
+        <p className="eyebrow" style={{ color: "rgba(255,255,235,.75)" }}>
+          Right now
+        </p>
+        <h2 id="live-h" style={{ marginTop: 10 }}>
+          {top.length ? (
+            <>
+              <span className="num">{fmtInt(total)}</span> airliners <em>in the air</em>
+            </>
+          ) : (
+            <>
+              Thousands of planes, <em>one story at a time</em>
+            </>
+          )}
+        </h2>
+        <p className="sub">
+          {top.length
+            ? `Across ${Object.keys(sib.data!.types).length} of the 40 airliner types we count every 10 minutes from volunteer ADS-B receivers.`
+            : sib.loading
+              ? "Counting the sky…"
+              : "Live counts are warming up. Check back in a few minutes."}
+        </p>
         {sib.loading ? (
           <div className="stats three">
             {Array.from({ length: 6 }, (_, i) => (
               <div className="stat" key={i}>
-                <Skeleton h={24} w="50%" />
+                <Skeleton h={28} w="50%" />
                 <Skeleton h={12} w="80%" style={{ marginTop: 8 }} />
               </div>
             ))}
           </div>
-        ) : top.length ? (
-          <>
-            <p className="sub" style={{ marginBottom: 12 }}>
-              <strong className="num">{fmtInt(total)}</strong> airliners of the {Object.keys(sib.data!.types).length} most common types are in the air worldwide, as seen by
-              volunteer receivers in the last 10 minutes.
-            </p>
+        ) : (
+          top.length > 0 && (
             <div className="stats three">
               {top.map(([t, n]) => (
                 <div className="stat" key={t}>
@@ -123,17 +140,30 @@ export function Home() {
                 </div>
               ))}
             </div>
-          </>
-        ) : (
-          <p className="muted">Live counts are warming up. Check back in a few minutes.</p>
+          )
         )}
-      </Card>
+      </section>
 
-      <Card title="How it works">
-        <ol className="sub" style={{ margin: 0, paddingLeft: 20 }}>
-          <li>Your flight number is matched to the aircraft broadcasting it right now (including regional partners like SkyWest).</li>
-          <li>Its transponder code unlocks the FAA registry record: build year, serial, engines, registered owner.</li>
-          <li>A nightly pipeline turns volunteer ADS-B data into a 30-day flight history for every US-registered aircraft.</li>
+      <h2 className="section-title">
+        How it <em>works</em>
+      </h2>
+      <Card title="Three public sources, one airframe">
+        <ol className="steps">
+          <li>
+            <span>
+              <strong>Find your plane.</strong> Your flight number is matched to the aircraft broadcasting it right now, including regional partners like SkyWest.
+            </span>
+          </li>
+          <li>
+            <span>
+              <strong>Read its papers.</strong> Its transponder code unlocks the FAA registry record: build year, serial, engines, registered owner.
+            </span>
+          </li>
+          <li>
+            <span>
+              <strong>Retrace its month.</strong> A nightly pipeline turns volunteer ADS-B data into a 30-day flight history for every US-registered aircraft.
+            </span>
+          </li>
         </ol>
       </Card>
     </>

@@ -23,8 +23,8 @@ export function Stat({ label, value, source, wide, text }: { label: string; valu
   );
 }
 
-export function Skeleton({ h = 16, w = "100%", style }: { h?: number; w?: number | string; style?: React.CSSProperties }) {
-  return <div className="sk" style={{ height: h, width: w, ...style }} aria-hidden="true" />;
+export function Skeleton({ h = 16, w = "100%", style }: { h?: number | string; w?: number | string; style?: React.CSSProperties }) {
+  return <span className="sk" style={{ display: "block", height: h, width: w, ...style }} aria-hidden="true" />;
 }
 
 export function Card({ title, children, id, busy }: { title: string; children: ReactNode; id?: string; busy?: boolean }) {

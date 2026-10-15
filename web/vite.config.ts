@@ -4,8 +4,9 @@ import { defineConfig } from "vitest/config";
 // Local dev: `wrangler dev` (worker/) on :8787 serves /api; generated data is symlinked into public/data.
 export default defineConfig({
   plugins: [react()],
-  server: { proxy: { "/api": "http://127.0.0.1:8787" } },
-  preview: { proxy: { "/api": "http://127.0.0.1:8787" } },
+  // API_PROXY=https://<project>.pages.dev to develop the UI against the deployed API.
+  server: { proxy: { "/api": { target: process.env.API_PROXY ?? "http://127.0.0.1:8787", changeOrigin: true } } },
+  preview: { proxy: { "/api": { target: process.env.API_PROXY ?? "http://127.0.0.1:8787", changeOrigin: true } } },
   worker: { format: "es" },
   optimizeDeps: { exclude: ["maplibre-gl"] },
   build: {

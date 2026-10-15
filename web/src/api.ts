@@ -73,7 +73,8 @@ export const api = {
       return b.photos?.[0] ?? null;
     };
     try {
-      return (await get(`https://api.planespotters.net/pub/photos/hex/${hex}`)) ?? (reg ? await get(`https://api.planespotters.net/pub/photos/reg/${encodeURIComponent(reg)}`) : null);
+      if (hex) return await get(`https://api.planespotters.net/pub/photos/hex/${hex}`);
+      return reg ? await get(`https://api.planespotters.net/pub/photos/reg/${encodeURIComponent(reg)}`) : null;
     } catch {
       return null;
     }

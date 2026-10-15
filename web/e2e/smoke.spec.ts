@@ -53,7 +53,7 @@ test("tail number lookup renders every section and the share card downloads", as
   await mock(page);
   await page.goto("/");
   await page.getByLabel("Flight number, tail number, or hex").fill("n47345");
-  await page.getByRole("button", { name: "Look up" }).click();
+  await page.getByRole("button", { name: "Look up", exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/p/${HEX}$`));
   await expect(page.getByRole("heading", { name: "N47345" })).toBeVisible();
   await expect(page.getByText("Boeing 737 MAX 8").first()).toBeVisible();

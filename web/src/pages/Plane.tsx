@@ -42,7 +42,10 @@ export function Plane({ hex }: { hex: string }) {
   const plainType = typeName(regRec) ?? (icaoType ? typeLabel(icaoType) : null) ?? info.data?.type ?? null;
   const kind = silhouetteKind(regRec, liveAc?.category, icaoType);
 
-  const photo = useLoad(() => api.photo(hex, registration), [hex, registration], !blocked && !reg.loading);
+  // Start the photo (the page's largest paint) immediately by hex; the tail-number lookup is only a fallback.
+  const photoHex = useLoad(() => api.photo(hex), [hex], !blocked);
+  const photoReg = useLoad(() => api.photo("", registration), [registration], !blocked && !photoHex.loading && !photoHex.data && !!registration);
+  const photo = { data: photoHex.data ?? photoReg.data, loading: photoHex.loading || photoReg.loading };
   const sib = useLoad(() => api.siblings(icaoType!), [icaoType], !!icaoType);
   const trend = useLoad(() => api.trend(icaoType!), [icaoType], !!icaoType);
   const cs = liveAc?.callsign && AIRLINE_CS.test(liveAc.callsign) ? liveAc.callsign : null;
@@ -77,14 +80,11 @@ export function Plane({ hex }: { hex: string }) {
       <section className="card hero" aria-labelledby="reg-h">
         <HeroPhoto photo={blocked ? null : (photo.data ?? null)} loading={!blocked && (photo.loading || reg.loading)} kind={kind} alt={`${registration ?? hex} ${plainType ?? ""}`.trim()} />
         <div className="hero-body">
-          {registration || !reg.loading ? (
-            <h1 className="reg" id="reg-h">
-              {registration ?? hex}
-            </h1>
-          ) : (
-            <Skeleton h={40} w="50%" />
-          )}
-          {plainType || !reg.loading ? <p className="type-line">{plainType ?? "Unknown type"}</p> : <Skeleton h={20} w="40%" style={{ marginTop: 6 }} />}
+          {/* Skeletons sit inside the same elements so the hero keeps its final height (no layout shift). */}
+          <h1 className="reg" id="reg-h">
+            {registration || !reg.loading ? (registration ?? hex) : <Skeleton h="1em" w="55%" />}
+          </h1>
+          <p className="type-line">{plainType || !reg.loading ? (plainType ?? "Unknown type") : <Skeleton h="1.1em" w="45%" style={{ display: "inline-block" }} />}</p>
           <div className="chips">
             {liveAc && !liveAc.onGround && <span className="chip live">Flying now</span>}
             {liveAc?.onGround && <span className="chip">On the ground</span>}
@@ -111,6 +111,12 @@ export function Plane({ hex }: { hex: string }) {
         <VitalStats loading={reg.loading || (needAdsbdb && info.loading)} us={us} rec={regRec} info={info.data} plainType={plainType} />
       )}
 
+      {!blocked && us && reg.loading && (
+        <Card title="How old is it, really?" busy>
+          <Skeleton h={72} />
+        </Card>
+      )}
+
       {!blocked && regRec?.pct != null && regRec.model_n && (
         <Card title="How old is it, really?">
           <p className="lede">
@@ -124,9 +130,9 @@ export function Plane({ hex }: { hex: string }) {
 
       {!blocked && <RightNow live={liveAc} loading={live.loading} error={live.error} route={route.data} routeLoading={route.loading} />}
 
-      {icaoType && (
-        <Card title="Siblings in the sky" busy={sib.loading}>
-          {sib.loading ? (
+      {(icaoType || live.loading || hist.loading) && (
+        <Card title="Siblings in the sky" busy={sib.loading || !icaoType}>
+          {sib.loading || !icaoType ? (
             <Skeleton h={28} w="70%" />
           ) : sib.data ? (
             <>
@@ -176,9 +182,9 @@ export function Plane({ hex }: { hex: string }) {
         />
       )}
 
-      <div style={{ marginTop: 24 }}>
-        <h2 className="small muted" style={{ textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
-          Look up another plane
+      <div>
+        <h2 className="section-title">
+          Look up <em>another</em> plane
         </h2>
         <SearchBox />
       </div>
@@ -275,7 +281,12 @@ function RightNow({ live, loading, error, route, routeLoading }: {
   if (error) {
     return (
       <Card title="Right now">
-        <p className="muted">{error instanceof FetchError ? error.message : "Live data is unavailable right now."}</p>
+        <p className="lede">Live position unavailable.</p>
+        <p className="muted" style={{ marginTop: 4 }}>
+          {error instanceof FetchError && error.code.startsWith("upstream")
+            ? "The volunteer ADS-B networks are busy or limiting requests from our server. Everything else on this card is unaffected; try again in a minute."
+            : "We couldn't reach the live data source. Everything else on this card is unaffected."}
+        </p>
       </Card>
     );
   }
@@ -437,7 +448,8 @@ function ShareSection({ data, ready }: { data: CardData; ready: boolean }) {
   const [msg, setMsg] = useState<string | null>(null);
   const key = JSON.stringify(data);
   useEffect(() => {
-    if (ref.current && ready) drawCard(ref.current, data);
+    // Wait for the web fonts so the card renders in EB Garamond / Figtree, not the fallback.
+    if (ref.current && ready) void document.fonts.ready.then(() => ref.current && drawCard(ref.current, data));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, ready]);
   return (

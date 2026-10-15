@@ -35,8 +35,8 @@ export default function MapView({ points, line, label }: { points: MapPoint[]; l
       center: [points[0].lon, points[0].lat],
       zoom: 4,
     });
-    const accent = dark ? "#6da7ec" : "#2a78d6";
-    const ink = dark ? "#ffffff" : "#0b2545";
+    const accent = dark ? "#e2c4fb" : "#034f46";
+    const ink = dark ? "#ffffeb" : "#1a1a1a";
     map.on("load", () => {
       // Start the compact attribution collapsed behind its (i) button so it doesn't cover a small map.
       map.getContainer().querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show");
@@ -58,7 +58,7 @@ export default function MapView({ points, line, label }: { points: MapPoint[]; l
         paint: {
           "circle-radius": ["match", ["get", "kind"], "plane", 7, 5],
           "circle-color": ["match", ["get", "kind"], "plane", accent, ink],
-          "circle-stroke-color": dark ? "#1a1a19" : "#ffffff",
+          "circle-stroke-color": dark ? "#12241f" : "#ffffeb",
           "circle-stroke-width": 2,
         },
       });
@@ -67,7 +67,7 @@ export default function MapView({ points, line, label }: { points: MapPoint[]; l
         type: "symbol",
         source: "pts",
         layout: { "text-field": ["get", "label"], "text-size": 12, "text-offset": [0, 1.2], "text-anchor": "top", "text-font": ["Noto Sans Regular"] },
-        paint: { "text-color": ink, "text-halo-color": dark ? "#1a1a19" : "#ffffff", "text-halo-width": 1.5 },
+        paint: { "text-color": ink, "text-halo-color": dark ? "#12241f" : "#ffffeb", "text-halo-width": 1.5 },
       });
       const all: [number, number][] = [...points.map((p) => [p.lon, p.lat] as [number, number]), ...(line ?? [])];
       if (all.length > 1) {
