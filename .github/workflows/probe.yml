@@ -6,10 +6,10 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: ADSB.lol by-type from a GitHub runner
+      - name: One combined by-type request for all tracked types
         run: |
-          for t in B738 A320 A321 E75L B38M A20N CRJ9 B739 A319 B737; do
-            curl -s -o /tmp/b -w "$t %{http_code} %{size_download}B %{time_total}s\n" -A "TailTale/1.0 (+https://github.com/${{ github.repository }})" "https://api.adsb.lol/v2/type/$t"
-            sleep 2
-          done
-          curl -s -o /dev/null -w "multi %{http_code} %{size_download}B %{time_total}s\n" -A "TailTale/1.0" "https://api.adsb.lol/v2/type/A319,A320,A321,A20N,A21N"
+          T="A319,A320,A321,A20N,A21N,BCS1,BCS3,A332,A333,A339,A359,A35K,A388,B737,B738,B739,B38M,B39M,B752,B763,B764,B772,B77W,B77L,B788,B789,B78X,B744,B748,E170,E75L,E75S,E190,E195,E290,CRJ2,CRJ7,CRJ9,AT76,DH8D"
+          curl -s --max-time 60 -o /tmp/all.json -w "combined %{http_code} %{size_download}B %{time_total}s\n" -A "TailTale/1.0 (+https://github.com/${{ github.repository }})" "https://api.adsb.lol/v2/type/$T" || echo "combined curl failed $?"
+          python3 -c "import json;d=json.load(open('/tmp/all.json'));print('aircraft',len(d['ac']),'total',d.get('total'))" || true
+          sleep 20
+          curl -s --max-time 60 -o /dev/null -w "second-after-20s %{http_code} %{time_total}s\n" -A "TailTale/1.0" "https://api.adsb.lol/v2/type/B738" || echo "second failed $?"
