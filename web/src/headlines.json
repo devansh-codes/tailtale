@@ -1,4 +1,17 @@
 {
-  "as_of": "pending first notebook run",
-  "sections": { "coverage": ["Notebook headline numbers appear here after the notebooks run."] }
+  "as_of": "history day 2026-10-14, FAA registry 2026-10-15",
+  "sections": {
+    "coverage": [
+      "Airliners: 62% of flights have both airports matched and 38% are partly observed (all US aircraft incl. general aviation: 43% and 51%).",
+      "20% of partly observed flights are simply split at midnight UTC; the rest lost coverage mid-flight (median silence 89 min).",
+      "Leg continuity is 100% over 68 consecutive airliner legs: each landing airport matched the next takeoff airport.",
+      "Published route tables agree with our departure airport 68% and arrival 72% of the time; our airports appear somewhere in the published itinerary 75%+ of the time."
+    ],
+    "fleet": [
+      "The oldest common US airliner type is the Boeing 757-200 (median 32 years); the youngest is the Boeing 737 MAX 8 (3).",
+      "21% of US airliners are registered to a bank, trust or lessor rather than the airline that flies them.",
+      "Hardest-working fleet in the sample: Southwest Airlines, 8.4 airborne hours per aircraft per flying day.",
+      "Business jets opt out of public tracking (FAA LADD/PIA) at the highest rate: 27% of those seen flying, vs 7% of piston aircraft."
+    ]
+  }
 }

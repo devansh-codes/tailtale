@@ -66,8 +66,12 @@ Full schema: [`pipeline/SCHEMA.md`](pipeline/SCHEMA.md). Upstream field notes: [
 ### Results on a real day (2026-10-14)
 
 67,631 traces read · 33,891 US aircraft · 82,309 flights · 3,431 privacy opt-outs · 2,034 outlier points dropped ·
-147 s end to end on a laptop, 167 MB peak memory. Route spot check: 100% leg continuity; 52% agreement with published
-callsign routes, which are themselves often stale (see the Data Quality page and `notebooks/`).
+147 s end to end on a laptop, 167 MB peak memory. Airliners: 62% of flights have both airports matched. Route spot
+check (25 airliners, 93 flights): 100% leg continuity over 68 legs; published callsign route tables agree with our
+departure airport 68% and arrival 72% of the time, and are themselves often stale (see `notebooks/`).
+
+Notebook findings: the 757-200 is the oldest common US airliner type (median 32 years); 21% of US airliners are
+registered to a bank, trust or lessor; business jets opt out of tracking at 27% vs 7% for piston aircraft.
 
 ## Free-tier budget
 
@@ -117,7 +121,7 @@ npm test && npm run build && npm run e2e
 ```
 pipeline/   Python ETL, tests, SCHEMA.md         worker/   API + cron + D1 migrations (vitest)
 web/        React app (vitest, Playwright)        data/     airline overrides (reference data only)
-notebooks/  coverage_and_gaps, fleet_insights     docs/     upstream notes, diagram, launch posts
+notebooks/  coverage_and_gaps, fleet_insights (+ build_notebooks.py)     docs/     upstream notes, diagram, launch posts
 .github/workflows/  ci.yml · daily.yml · worker.yml
 ```
 

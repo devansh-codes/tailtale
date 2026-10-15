@@ -109,7 +109,7 @@ def main(argv: list[str] | None = None) -> int:
     log({k: v for k, v in rep.items() if k != "rows"})
     if a.out:
         rep["generated_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-        write_json(a.out, {k: v for k, v in rep.items() if k != "rows"} | {"rows": rep["rows"][:60]})
+        write_json(a.out, rep)
     return 0
 
 

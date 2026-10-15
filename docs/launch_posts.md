@@ -56,10 +56,12 @@ You get:
 - A "Plane Wrapped" card to share
 
 Some things I learned building it:
-- A huge share of US airliners are registered to banks and trusts as lessor trustees, not the airline whose
-  paint is on them.
+- About a fifth of US airliners are registered to banks, trusts or lessors, not the airline whose paint is on them.
+- The oldest common US airliner type is the 757-200 (median age 32 years); Southwest gets the most airborne hours
+  out of each aircraft per flying day in my sample (8.4 h).
 - Published callsign → route tables are surprisingly stale. Airlines reuse a flight number across several legs.
-- Business jets dominate the FAA LADD/PIA privacy programs; those aircraft get a type-only card, no tracking.
+- Business jets opt out of public tracking (FAA LADD/PIA) at the highest rate, about 27% of those seen flying vs 7%
+  of piston aircraft. Those aircraft get a type-only card, no tracking.
 
 Limitations: US (N-number) aircraft get the full card; coverage depends on volunteers' receivers, so oceanic legs
 show as "partly observed" rather than guessed. Not for anything operational; it's for curiosity.

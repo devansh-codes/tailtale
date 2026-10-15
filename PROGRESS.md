@@ -70,3 +70,35 @@
 - Tests: vitest 7 passed; Playwright smoke 4 passed (mocked, CI-safe), covering a full plane page,
   the share PNG downloading at exactly 1080×1350, the regional not_found hint, and a LADD aircraft showing type only.
 - `wrangler pages dev`: the Pages Function `/api/*` resolves N47345 through the static N shard via `ASSETS`.
+
+## Phase 6: Automation and deploy (built and tested locally; live run pending credentials)
+- `.github/workflows/ci.yml` (ruff, pytest with history_etl coverage gate ≥ 80%, tsc, vitest, build, Playwright),
+  `daily.yml` (cron 09:00 UTC + manual dispatch with `day`, `backfill`, `skip_etl`, `simulate_failure`; also
+  redeploys on pushes touching web/ or worker/src/), `worker.yml` (D1 migrations + Worker deploy). actionlint: clean.
+- "Keep yesterday's data": each run starts from the last deployed data (Actions cache, else `deploy_data.py mirror`
+  of the live site per its manifest). ETL steps are `continue-on-error`; the site is always redeployed; the job is
+  marked failed afterwards so failures are visible. The deploy refuses to publish without the registry.
+- Local outage simulation (bad FAA URL + nonexistent history day): the FAA size guard rejected the 109 KB HTML
+  response, all 224 registry shards and all history shards stayed byte-identical (10,275 files before and after),
+  and `quality/latest.json` reported `missing` with `history_last_ok` = previous day.
+- Pages limits check on a full build: 10,282 files, largest 2.4 MB.
+- `scripts/setup-cloudflare.sh` creates the D1 database, the Pages project and the workers.dev subdomain, writes
+  the IDs into both `wrangler.toml` files, applies migrations, deploys the Worker, and sets the GitHub secrets/vars.
+- **Pending (needs credentials):** create the GitHub repo and push, run setup, the first `daily.yml` run on a GitHub
+  runner (Phase 3 runner timing), and the phone check of the live URL.
+
+## Phase 7: Polish and launch kit
+- `notebooks/coverage_and_gaps.ipynb`, `notebooks/fleet_insights.ipynb` executed on real data (history 2026-10-14,
+  FAA 2026-10-15); regenerate with `notebooks/build_notebooks.py`. Headlines feed the Data Quality page
+  (`web/src/headlines.json`).
+  - Airliners: 62% both airports matched, 38% partly observed (all US aircraft: 43% / 51%); 20% of partly observed
+    flights are just midnight splits.
+  - Route spot check, 25 airliners / 93 flights: continuity 100% over 68 legs; published tables agree with our
+    departure 68% and arrival 72% of the time.
+  - 757-200 is the oldest common type (median 32 years); 21% of airliners are registered to banks, trusts or lessors;
+    Southwest 8.4 airborne h per aircraft per flying day; business jets opt out of tracking at 27% (piston 7%).
+  - Corrected during review: an early draft said opt-outs were "overwhelmingly" business jets. By count, piston
+    aircraft lead (1,262 vs 1,070); business jets lead by **rate**.
+- README with screenshots + architecture diagram (`docs/architecture.svg`), ATTRIBUTION.md, MIT LICENSE (code),
+  launch post drafts (`docs/launch_posts.md`).
+- Privacy pass on committed fixtures: live positions/callsigns of LADD-flagged aircraft and the LADD trace were removed.
