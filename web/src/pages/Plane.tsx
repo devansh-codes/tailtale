@@ -295,7 +295,7 @@ function RightNow({ live, loading, error, route, routeLoading }: {
       <Card title="Right now">
         <p className="lede">On the ground{live.callsign ? ` as ${live.callsign}` : ""}.</p>
         <p className="muted small" style={{ marginTop: 4 }}>
-          Source: ADSB.lol live data{live.posAge != null ? `, position ${Math.round(live.posAge)} s old` : ""}.
+          Source: {net(live)} live data{live.posAge != null ? `, position ${Math.round(live.posAge)} s old` : ""}.
         </p>
         {points.length > 0 && <LazyMap points={points} label="Map of the aircraft's current position on the ground" />}
       </Card>
@@ -326,13 +326,13 @@ function RightNow({ live, loading, error, route, routeLoading }: {
         </div>
       )}
       <div className="stats">
-        <Stat label="Altitude" value={live.alt != null ? `${fmtInt(live.alt)} ft` : null} source="ADSB.lol (barometric)" />
-        <Stat label="Ground speed" value={live.gs != null ? `${fmtInt(Math.round(live.gs))} kt` : null} source="ADSB.lol" />
-        <Stat label="Callsign" value={live.callsign} source="ADSB.lol" text />
+        <Stat label="Altitude" value={live.alt != null ? `${fmtInt(live.alt)} ft` : null} source={`${net(live)} (barometric)`} />
+        <Stat label="Ground speed" value={live.gs != null ? `${fmtInt(Math.round(live.gs))} kt` : null} source={net(live)} />
+        <Stat label="Callsign" value={live.callsign} source={net(live)} text />
         <Stat
           label="Vertical rate"
           value={live.vrate != null ? (Math.abs(live.vrate) < 200 ? "Level" : `${live.vrate > 0 ? "Climbing" : "Descending"} ${fmtInt(Math.abs(live.vrate))} ft/min`) : null}
-          source="ADSB.lol"
+          source={net(live)}
           text
         />
       </div>
@@ -341,6 +341,7 @@ function RightNow({ live, loading, error, route, routeLoading }: {
   );
 }
 
+const net = (l: LiveAircraft) => (l.provider === "adsb.fi" ? "adsb.fi" : "ADSB.lol");
 const cs = (l: LiveAircraft) => !!l.callsign && AIRLINE_CS.test(l.callsign);
 
 function Last30({ loading, summary, airports, hasData }: {

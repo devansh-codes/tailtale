@@ -66,7 +66,7 @@ export default function App() {
             wrong or delayed.
           </p>
           <p>
-            Data: ADSB.lol (ODbL), FAA registry, Planespotters.net, adsbdb, OurAirports, OpenFlights (ODbL), OpenFreeMap / OpenStreetMap.{" "}
+            Data: ADSB.lol (ODbL), <a href="https://adsb.fi">adsb.fi</a>, FAA registry, Planespotters.net, adsbdb, OurAirports, OpenFlights (ODbL), OpenFreeMap / OpenStreetMap.{" "}
             <Link href="/about">Attribution</Link>
           </p>
         </div>

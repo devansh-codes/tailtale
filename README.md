@@ -127,5 +127,5 @@ notebooks/  coverage_and_gaps, fleet_insights (+ build_notebooks.py)     docs/  
 
 ## Credits
 
-Data from ADSB.lol (ODbL), the FAA, Planespotters.net, adsbdb, OurAirports, OpenFlights (ODbL) and
+Data from ADSB.lol (ODbL), adsb.fi, the FAA, Planespotters.net, adsbdb, OurAirports, OpenFlights (ODbL) and
 OpenFreeMap/OpenStreetMap. See [ATTRIBUTION.md](ATTRIBUTION.md). Code: MIT. Derived history data: ODbL.

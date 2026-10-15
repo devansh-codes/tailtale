@@ -55,6 +55,9 @@ export function About() {
           under the same ODbL license.
         </li>
         <li>
+          <a href="https://adsb.fi">adsb.fi</a>: live positions when ADSB.lol is busy (open data API, personal non-commercial use, with thanks).
+        </li>
+        <li>
           <a href="https://registry.faa.gov/aircraftinquiry/">FAA Civil Aircraft Registry</a>: public US government data.
         </li>
         <li>

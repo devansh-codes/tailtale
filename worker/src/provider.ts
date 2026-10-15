@@ -19,7 +19,7 @@ const num = (v: unknown): number | null => (typeof v === "number" && Number.isFi
 const str = (v: unknown): string | null => (typeof v === "string" && v.trim() ? v.trim() : null);
 
 /** ADSBExchange-v2-style aircraft object -> trimmed LiveAircraft. LADD/PIA aircraft lose all position data. */
-export function trimAircraft(a: Raw): LiveAircraft {
+export function trimAircraft(a: Raw, provider = "adsb.lol"): LiveAircraft {
   const flags = num(a.dbFlags) ?? 0;
   const blocked = (flags & (DBFLAG_LADD | DBFLAG_PIA)) !== 0;
   const onGround = a.alt_baro === "ground";
@@ -44,6 +44,7 @@ export function trimAircraft(a: Raw): LiveAircraft {
     category: str(a.category),
     source: str(a.type),
     blocked,
+    provider,
   };
   if (blocked) {
     return { ...base, callsign: null, alt: null, gs: null, track: null, vrate: null, lat: null, lon: null, posAge: null };
@@ -51,18 +52,21 @@ export function trimAircraft(a: Raw): LiveAircraft {
   return base;
 }
 
-// Module-level cooldown: after a 429 we stop calling the upstream for a while (per isolate).
-let cooldownUntil = 0;
+// Module-level cooldown per upstream: after a 429 we stop calling it for a while (per isolate).
+const cooldownUntil = new Map<string, number>();
 
 export function _resetCooldown(): void {
-  cooldownUntil = 0;
+  cooldownUntil.clear();
 }
 
-export class AdsbLolProvider implements LiveProvider {
-  readonly name = "adsb.lol";
+/** Any readsb / ADSBExchange-v2-compatible API (same JSON envelope; paths differ slightly). */
+export class ReadsbV2Provider implements LiveProvider {
   constructor(
+    readonly name: string,
     private ua: string,
-    private base = "https://api.adsb.lol",
+    private base: string,
+    private regPath: string,
+    private hasTypeEndpoint: boolean,
     private fetcher: typeof fetch = (...a) => fetch(...a),
     private retries429 = 1,
     private retryDelayMs = 1200,
@@ -70,7 +74,7 @@ export class AdsbLolProvider implements LiveProvider {
   ) {}
 
   private async get(path: string): Promise<Response> {
-    if (Date.now() < cooldownUntil) {
+    if (Date.now() < (cooldownUntil.get(this.name) ?? 0)) {
       throw new ApiError(503, "upstream_busy", "The live data source asked us to slow down. Try again in a minute.");
     }
     for (let attempt = 0; ; attempt++) {
@@ -90,7 +94,7 @@ export class AdsbLolProvider implements LiveProvider {
           continue;
         }
         const ra = Number(res.headers.get("retry-after"));
-        cooldownUntil = Date.now() + (Number.isFinite(ra) && ra > 0 ? ra * 1000 : 15_000);
+        cooldownUntil.set(this.name, Date.now() + (Number.isFinite(ra) && ra > 0 ? ra * 1000 : 15_000));
         throw new ApiError(503, "upstream_busy", "The live data source asked us to slow down. Try again in a minute.");
       }
       if (!res.ok) {
@@ -102,7 +106,7 @@ export class AdsbLolProvider implements LiveProvider {
 
   private async list(path: string): Promise<LiveAircraft[]> {
     const body = (await (await this.get(path)).json()) as { ac?: Raw[] };
-    return Array.isArray(body.ac) ? body.ac.map(trimAircraft) : [];
+    return Array.isArray(body.ac) ? body.ac.map((a) => trimAircraft(a, this.name)) : [];
   }
 
   async byHex(hex: string): Promise<LiveAircraft | null> {
@@ -115,7 +119,7 @@ export class AdsbLolProvider implements LiveProvider {
   }
 
   async byReg(reg: string): Promise<LiveAircraft | null> {
-    return (await this.list(`/v2/reg/${encodeURIComponent(reg)}`))[0] ?? null;
+    return (await this.list(`${this.regPath}${encodeURIComponent(reg)}`))[0] ?? null;
   }
 
   /**
@@ -123,8 +127,69 @@ export class AdsbLolProvider implements LiveProvider {
    * The body is streamed and scanned for each aircraft's `"hex":` key and for `"alt_baro":"ground"`.
    */
   async countType(icaoType: string): Promise<TypeCount> {
+    if (!this.hasTypeEndpoint) throw new ApiError(501, "unsupported", `${this.name} has no by-type endpoint.`);
     const res = await this.get(`/v2/type/${encodeURIComponent(icaoType)}`);
     return countStream(res.body);
+  }
+}
+
+export class AdsbLolProvider extends ReadsbV2Provider {
+  constructor(
+    ua: string,
+    base = "https://api.adsb.lol",
+    fetcher?: typeof fetch,
+    retries429 = 1,
+    retryDelayMs = 1200,
+    sleep?: (ms: number) => Promise<void>,
+  ) {
+    super("adsb.lol", ua, base, "/v2/reg/", true, fetcher, retries429, retryDelayMs, sleep);
+  }
+}
+
+/** adsb.fi open data: free for personal, non-commercial use with attribution; 1 request/second; no by-type endpoint. */
+export class AdsbFiProvider extends ReadsbV2Provider {
+  constructor(ua: string, fetcher?: typeof fetch, sleep?: (ms: number) => Promise<void>) {
+    super("adsb.fi", ua, "https://opendata.adsb.fi/api", "/v2/registration/", false, fetcher, 1, 1100, sleep);
+  }
+}
+
+const RETRYABLE = new Set(["upstream_busy", "upstream_unreachable", "upstream_error"]);
+
+/**
+ * Primary first; if it is rate-limiting or down, ask the secondary. ADSB.lol throttles shared cloud egress IPs
+ * heavily, so a second volunteer network keeps lookups working. Counting by type stays primary-only.
+ */
+export class FallbackProvider implements LiveProvider {
+  readonly name: string;
+  constructor(
+    private primary: LiveProvider,
+    private secondary: LiveProvider,
+  ) {
+    this.name = `${primary.name}+${secondary.name}`;
+  }
+  private async run<T>(f: (p: LiveProvider) => Promise<T>): Promise<T> {
+    try {
+      return await f(this.primary);
+    } catch (e) {
+      if (!(e instanceof ApiError) || !RETRYABLE.has(e.code)) throw e;
+      try {
+        return await f(this.secondary);
+      } catch (e2) {
+        throw e2 instanceof ApiError && e2.code === "unsupported" ? e : e2;
+      }
+    }
+  }
+  byHex(hex: string) {
+    return this.run((p) => p.byHex(hex));
+  }
+  byCallsigns(cs: string[]) {
+    return this.run((p) => p.byCallsigns(cs));
+  }
+  byReg(reg: string) {
+    return this.run((p) => p.byReg(reg));
+  }
+  countType(t: string) {
+    return this.run((p) => p.countType(t));
   }
 }
 

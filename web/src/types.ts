@@ -67,6 +67,8 @@ export interface LiveAircraft {
   category: string | null;
   source: string | null;
   blocked: boolean;
+  /** Live network that answered: "adsb.lol" or "adsb.fi". */
+  provider?: string;
 }
 
 export interface LiveResponse {

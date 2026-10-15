@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { handleRequest, handleScheduled } from "../src/app";
 import { lookupAircraft, lookupRoute } from "../src/enrich";
-import { AdsbLolProvider, _resetCooldown, countStream, trimAircraft } from "../src/provider";
+import { AdsbFiProvider, AdsbLolProvider, FallbackProvider, _resetCooldown, countStream, trimAircraft } from "../src/provider";
 import { runCron, siblings } from "../src/siblings";
 import { CRON_GROUPS, TRACKED_TYPES } from "../src/tracked";
 import type { Env } from "../src/types";
@@ -58,7 +58,7 @@ describe("provider", () => {
     const stale = trimAircraft(raw.find((a) => a.lastPosition && a.lat === undefined) ?? { hex: "x", lastPosition: { lat: 1, lon: 2, seen_pos: 600 } });
     expect(stale.lat).not.toBeNull();
     expect(Object.keys(ground).sort()).toEqual(
-      ["alt", "blocked", "callsign", "category", "gs", "hex", "lat", "lon", "onGround", "posAge", "reg", "seen", "source", "track", "type", "vrate"],
+      ["alt", "blocked", "callsign", "category", "gs", "hex", "lat", "lon", "onGround", "posAge", "provider", "reg", "seen", "source", "track", "type", "vrate"],
     );
   });
 
@@ -92,6 +92,42 @@ describe("provider", () => {
     expect(await ok.byCallsigns([])).toEqual([]);
     const typ = new AdsbLolProvider(UA, "x", (async () => new Response(fixture("adsblol_type_B738.json"))) as unknown as typeof fetch);
     expect((await typ.countType("B738")).total).toBe(1133);
+  });
+});
+
+describe("fallback provider", () => {
+  const busy = (async () => new Response("", { status: 429 })) as unknown as typeof fetch;
+  const fiFetch = vi.fn(async (u: RequestInfo | URL) => {
+    const url = String(u);
+    if (url.includes("/v2/registration/")) return new Response(fixture("adsbfi_hex_a465df.json"));
+    return new Response(fixture("adsbfi_hex_a465df.json"));
+  }) as unknown as typeof fetch;
+
+  it("answers from adsb.fi when ADSB.lol is rate-limiting, and says so", async () => {
+    const p = new FallbackProvider(new AdsbLolProvider(UA, "x", busy, 0, 0, async () => {}), new AdsbFiProvider(UA, fiFetch, async () => {}));
+    const a = await p.byHex("a465df");
+    expect(a).toMatchObject({ hex: "A465DF", reg: "N38257", provider: "adsb.fi" });
+    expect(JSON.stringify(a)).not.toMatch(/ownOp|UNITED AIRLINES/);
+    expect((await p.byCallsigns(["UAL1125", "SKW1125"]))[0].callsign).toBe("UAL1125");
+    await p.byReg("N38257");
+    expect((fiFetch as unknown as { mock: { calls: unknown[][] } }).mock.calls.some((c) => String(c[0]).includes("/v2/registration/N38257"))).toBe(true);
+    // adsb.fi has no by-type endpoint: the primary's error surfaces.
+    await expect(p.countType("B738")).rejects.toMatchObject({ code: "upstream_busy" });
+    expect(p.name).toBe("adsb.lol+adsb.fi");
+  });
+
+  it("does not fall back on caller errors, and prefers the primary when it answers", async () => {
+    const ok = new AdsbLolProvider(UA, "x", (async () => new Response(fixture("adsblol_hex_a7197d.json"))) as unknown as typeof fetch);
+    const never = vi.fn();
+    const p = new FallbackProvider(ok, { name: "x", byHex: never, byCallsigns: never, byReg: never, countType: never });
+    expect((await p.byHex("a7197d"))?.provider).toBe("adsb.lol");
+    expect(never).not.toHaveBeenCalled();
+    const boom = new FallbackProvider(
+      { name: "a", byHex: async () => { throw new Error("bug"); }, byCallsigns: never, byReg: never, countType: never },
+      { name: "b", byHex: never, byCallsigns: never, byReg: never, countType: never },
+    );
+    await expect(boom.byHex("a")).rejects.toThrow("bug");
+    expect(never).not.toHaveBeenCalled();
   });
 });
 

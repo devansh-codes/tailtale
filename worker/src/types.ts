@@ -34,6 +34,8 @@ export interface LiveAircraft {
   source: string | null;
   /** Owner opted out of public tracking (FAA LADD or PIA): position fields are always null. */
   blocked: boolean;
+  /** Which live network answered ("adsb.lol" or "adsb.fi"), for attribution on the page. */
+  provider: string;
 }
 
 export interface TypeCount {

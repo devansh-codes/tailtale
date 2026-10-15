@@ -6,6 +6,7 @@ these datasets.
 | Source | Used for | License / terms |
 |---|---|---|
 | [ADSB.lol](https://adsb.lol) | Live aircraft positions (`api.adsb.lol`) and daily history archives ([globe_history](https://github.com/adsblol)) | [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/) |
+| [adsb.fi](https://adsb.fi) | Fallback live positions when ADSB.lol is rate-limiting ([open data API](https://github.com/adsbfi/opendata)) | Personal, non-commercial use with citation and a link to adsb.fi; 1 request/second |
 | [FAA Civil Aircraft Registry](https://registry.faa.gov/aircraftinquiry/) | Airframe facts (Releasable Aircraft Database) | Public US government data |
 | [Planespotters.net](https://www.planespotters.net) | Aircraft photos | Called from the browser only; every photo shows its photographer's credit and links to its Planespotters page; URLs used unchanged; never cached, proxied, or put in generated images |
 | [adsbdb.com](https://www.adsbdb.com) | Aircraft and callsign route enrichment | Free public API |

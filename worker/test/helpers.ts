@@ -9,7 +9,7 @@ export const fixture = (name: string): string => readFileSync(join(FIX, name), "
 export const fixtureJson = <T = unknown>(name: string): T => JSON.parse(fixture(name)) as T;
 
 export function liveFromFixture(name: string): LiveAircraft[] {
-  return fixtureJson<{ ac: Record<string, unknown>[] }>(name).ac.map(trimAircraft);
+  return fixtureJson<{ ac: Record<string, unknown>[] }>(name).ac.map((a) => trimAircraft(a));
 }
 
 /** In-memory provider that records every upstream call (to assert "one request per action"). */
@@ -60,6 +60,7 @@ export function aircraft(p: Partial<LiveAircraft> & { hex: string }): LiveAircra
     category: "A3",
     source: "adsb_icao",
     blocked: false,
+    provider: "adsb.lol",
     ...p,
   };
 }

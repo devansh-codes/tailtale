@@ -1,6 +1,6 @@
 import { lookupAircraft, lookupRoute } from "./enrich";
 import { ApiError, cached, errorResponse, json, userAgent, withCors } from "./http";
-import { AdsbLolProvider, type LiveProvider } from "./provider";
+import { AdsbFiProvider, AdsbLolProvider, FallbackProvider, type LiveProvider } from "./provider";
 import { resolve } from "./resolve";
 import { allSiblings, lastCron, normalizeType, runCron, siblings, trend } from "./siblings";
 import type { Ctx, Env } from "./types";
@@ -11,7 +11,8 @@ export interface Deps {
 }
 
 export function defaultDeps(env: Env): Deps {
-  return { provider: new AdsbLolProvider(userAgent(env)), fetcher: (...a) => fetch(...a) };
+  const ua = userAgent(env);
+  return { provider: new FallbackProvider(new AdsbLolProvider(ua), new AdsbFiProvider(ua)), fetcher: (...a) => fetch(...a) };
 }
 
 const HEX = /^[0-9A-Fa-f]{6}$/;
@@ -106,17 +107,24 @@ export async function route(req: Request, env: Env, ctx: Ctx, deps: Deps = defau
     const probe = async (u: string) => {
       try {
         const r = await deps.fetcher(u, { headers: { "user-agent": ua }, signal: AbortSignal.timeout(5000) });
-        return { ok: r.status < 500, status: r.status, ms: Date.now() - t0 };
+        const note = r.status >= 400 ? (await r.text()).slice(0, 120) : undefined;
+        return { ok: r.status < 400 || r.status === 404, status: r.status, ms: Date.now() - t0, note };
       } catch {
         return { ok: false, status: 0, ms: Date.now() - t0 };
       }
     };
-    const [adsblol, adsbdb, cron] = await Promise.all([
+    const [adsblol, adsbfi, adsbdb, cron] = await Promise.all([
       probe("https://api.adsb.lol/v2/hex/000000"),
+      probe("https://opendata.adsb.fi/api/v2/hex/000000"),
       probe("https://api.adsbdb.com/v0/callsign/UAL1"),
       lastCron(env).catch(() => null),
     ]);
-    return json({ ok: adsblol.ok && adsbdb.ok, upstreams: { "adsb.lol": adsblol, adsbdb }, lastCron: cron, provider: deps.provider.name });
+    return json({
+      ok: (adsblol.ok || adsbfi.ok) && adsbdb.ok,
+      upstreams: { "adsb.lol": adsblol, "adsb.fi": adsbfi, adsbdb },
+      lastCron: cron,
+      provider: deps.provider.name,
+    });
   }
 
   throw new ApiError(404, "no_route", "Unknown endpoint.");
@@ -148,6 +156,7 @@ export async function handleScheduled(
   opts: { sleep?: (ms: number) => Promise<void> } = {},
 ): Promise<void> {
   // The cron is not latency-sensitive: wait longer before its single retry on a 429.
+  // Type counts only exist on ADSB.lol, so the cron uses it alone.
   const d = deps ?? { provider: new AdsbLolProvider(userAgent(env), undefined, undefined, 1, 5000), fetcher: fetch };
   await runCron(env, d.provider, cron, opts);
 }

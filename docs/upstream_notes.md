@@ -123,6 +123,14 @@ photographer}]}`; none → `{"photos":[]}`. Sends `access-control-allow-origin: 
 OpenFreeMap public instance: free, no key, no limits stated, no cookies. Style `https://tiles.openfreemap.org/styles/positron`.
 Attribution: "OpenFreeMap © OpenMapTiles Data from OpenStreetMap".
 
+## adsb.fi open data (fallback live provider, added after deploy)
+
+`https://opendata.adsb.fi/api/v2/hex/{hex}`, `/v2/callsign/{a,b,…}` (comma lists work), `/v2/registration/{reg}`.
+Same envelope as ADSB.lol (`ac, msg, now, total, ctime, ptime`; fixture `adsbfi_hex_a465df.json`, `ownOp` removed).
+**No by-type endpoint**, so sibling counts stay ADSB.lol-only. 1 request/second; personal non-commercial use;
+must cite adsb.fi with a link. Added because ADSB.lol answered 429 to nearly every request from Cloudflare's shared
+egress IPs (7 of 8 live lookups in a test, and every cron call), while working from a home connection.
+
 ## Rejected
 
 * airplanes.live API now returns 403 "Please contact us at contact@airplanes.live..." for keyless use. Not usable under

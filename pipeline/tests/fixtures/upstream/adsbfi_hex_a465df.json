@@ -1,0 +1,9 @@
+{"ac":[
+{"hex":"a465df","type":"adsb_icao","flight":"UAL1125 ","r":"N38257","t":"B738","desc":"BOEING 737-800","year":"2000","alt_baro":30400,"alt_geom":31525,"gs":454.1,"track":316.43,"baro_rate":1344,"squawk":"7664","emergency":"none","category":"A3","nav_qnh":1013.6,"nav_altitude_mcp":32000,"nav_heading":256.64,"lat":36.397659,"lon":-116.555271,"nic":8,"rc":186,"seen_pos":0.226,"version":2,"nic_baro":1,"nac_p":9,"nac_v":1,"sil":3,"sil_type":"perhour","gva":2,"sda":2,"alert":0,"spi":0,"mlat":[],"tisb":[],"messages":18082,"seen":0.1,"rssi":-8.6}
+]
+,"msg": "No error"
+,"now": 1792085768001
+,"total": 1
+,"ctime": 1792085768001
+,"ptime": 0
+}
