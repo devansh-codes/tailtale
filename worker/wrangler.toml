@@ -4,14 +4,14 @@ compatibility_date = "2026-10-15"
 workers_dev = true
 
 [vars]
-PAGES_ORIGIN = "https://tailtale.pages.dev"
+PAGES_ORIGIN = "https://tailtale-50y.pages.dev"
 REPO_URL = "https://github.com/devansh-codes/tailtale"
 EXTRA_ORIGINS = "http://localhost:5173,http://127.0.0.1:5173"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "tailtale"
-database_id = "00000000-0000-0000-0000-000000000000" # replaced by scripts/setup-cloudflare.sh
+database_id = "b1ec9515-0c58-44f6-8e00-8d58716d2064"
 migrations_dir = "migrations"
 
 [triggers]

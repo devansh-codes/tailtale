@@ -62,7 +62,7 @@ describe("resolve", () => {
     const r = await resolve("a7197d", deps(p));
     expect(r).toMatchObject({ hex: "A7197D", reg: "N557AS", callsign: "ASA73", type: "B738", matchedBy: "hex" });
     expect(r.live?.alt).toBe(16250);
-    expect(p.calls).toEqual(["hex:A7197D"]);
+    expect(p.calls).toEqual(["hex:A7197D"]); // registry checked first (static), then one live call
   });
 
   it("resolves a registry-only hex when the plane is not flying", async () => {
@@ -75,6 +75,14 @@ describe("resolve", () => {
     const r = await resolve("n557as", deps(p));
     expect(r).toMatchObject({ hex: "A7197D", reg: "N557AS", matchedBy: "n_number" });
     expect(p.calls).toEqual(["hex:A7197D"]);
+  });
+
+  it("still resolves registry aircraft when the live source is rate-limiting", async () => {
+    const busy = new FakeProvider([], {}, new ApiError(503, "upstream_busy", "slow down"));
+    expect(await resolve("N557AS", deps(busy))).toMatchObject({ hex: "A7197D", matchedBy: "n_number", live: null });
+    expect(await resolve("A7197D", deps(busy))).toMatchObject({ hex: "A7197D", matchedBy: "hex", live: null });
+    // Unknown aircraft still surface the upstream error rather than a misleading not_found.
+    await expect(resolve("DL1234", deps(busy))).rejects.toMatchObject({ code: "upstream_busy" });
   });
 
   it("falls back to live /reg for N-numbers missing from the registry", async () => {

@@ -4,10 +4,10 @@ pages_build_output_dir = "dist"
 compatibility_date = "2026-10-15"
 
 [vars]
-PAGES_ORIGIN = "https://tailtale.pages.dev"
+PAGES_ORIGIN = "https://tailtale-50y.pages.dev"
 REPO_URL = "https://github.com/devansh-codes/tailtale"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "tailtale"
-database_id = "00000000-0000-0000-0000-000000000000" # replaced by scripts/setup-cloudflare.sh
+database_id = "b1ec9515-0c58-44f6-8e00-8d58716d2064"

@@ -77,6 +77,16 @@ function fromLive(live: LiveAircraft, matchedBy: MatchedBy): Resolved {
   };
 }
 
+/** Live state is a bonus once the registry already knows the aircraft: an upstream hiccup must not fail the lookup. */
+async function liveOrNull(deps: ResolveDeps, hex: string): Promise<LiveAircraft | null> {
+  try {
+    return await deps.provider.byHex(hex);
+  } catch (e) {
+    if (e instanceof ApiError) return null;
+    throw e;
+  }
+}
+
 async function registryHasHex(deps: ResolveDeps, hex: string): Promise<boolean> {
   // Avoid JSON.parse of a ~500 KB shard (CPU budget): a quoted-key substring test is exact enough.
   const t = await deps.staticText(`reg/hex/${hex.slice(0, 3)}.json`);
@@ -93,18 +103,20 @@ export async function resolve(input: string, deps: ResolveDeps): Promise<Resolve
   for (const k of kinds) {
     switch (k.kind) {
       case "hex": {
-        const live = await deps.provider.byHex(k.hex);
-        if (live) return fromLive(live, "hex");
         if (await registryHasHex(deps, k.hex)) {
+          const live = await liveOrNull(deps, k.hex);
+          if (live) return fromLive(live, "hex");
           return { hex: k.hex, reg: null, callsign: null, type: null, matchedBy: "hex", live: null, blocked: false };
         }
+        const live = await deps.provider.byHex(k.hex);
+        if (live) return fromLive(live, "hex");
         break;
       }
       case "n_number": {
         const shard = await deps.staticText(`reg/n/${k.reg.slice(1, 4)}.json`);
         const hex = shard ? ((JSON.parse(shard) as Record<string, string>)[k.reg] ?? null) : null;
         if (hex) {
-          const live = await deps.provider.byHex(hex);
+          const live = await liveOrNull(deps, hex);
           if (live) return { ...fromLive(live, "n_number"), reg: k.reg };
           return { hex, reg: k.reg, callsign: null, type: null, matchedBy: "n_number", live: null, blocked: false };
         }
