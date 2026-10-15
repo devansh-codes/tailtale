@@ -102,3 +102,16 @@
 - README with screenshots + architecture diagram (`docs/architecture.svg`), ATTRIBUTION.md, MIT LICENSE (code),
   launch post drafts (`docs/launch_posts.md`).
 - Privacy pass on committed fixtures: live positions/callsigns of LADD-flagged aircraft and the LADD trace were removed.
+
+## Deploy + redesign (2026-10-15)
+- Live: https://tailtale-50y.pages.dev (Pages project `tailtale`; the bare name was taken globally) and
+  https://tailtale-api.chaudharydevansh2022.workers.dev. Repo: https://github.com/devansh-codes/tailtale.
+- First GitHub Actions ETL (7-day backfill) succeeded in 20 min; one full day takes ~103 s on the runner.
+  Site rebuild on a cold runner mirrored all 10,276 data files from the live site with 0 failures.
+- Fixes found in production: the cron work moved out of `ctx.waitUntil` (30 s cap); a registry hit no longer fails
+  when live data is unavailable; adsb.fi added as a fallback live provider.
+- **Open issue:** ADSB.lol answers 429 and adsb.fi answers 403 to most requests from Cloudflare's egress IPs, so
+  flight-number search, "Right now" and sibling counts are mostly unavailable in production. Proposed fix:
+  fetch a live airliner snapshot from GitHub Actions every ~10 min into D1.
+- Redesign to a cream / serif / lavender look (EB Garamond + Figtree, self-hosted). Lighthouse mobile:
+  home 98, plane page 90–91 (LCP is the Planespotters photo, which may not be proxied), accessibility 100, CLS 0.002.
