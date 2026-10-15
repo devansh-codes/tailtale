@@ -278,7 +278,7 @@ describe("HTTP API", () => {
     expect(await all.json()).toMatchObject({ types: { B738: expect.any(Number) } });
     expect((await handleRequest(new Request("https://x/api/siblings/TOOLONG"), e, ctx(), deps)).status).toBe(400);
     // Stale cron data falls back to a live count.
-    const stale = new FakeD1([{ ts: ts - 7200, type: "B738", n: 5, total: 5 }]);
+    const stale = new FakeD1([{ ts: ts - 7 * 3600, type: "B738", n: 5, total: 5 }]);
     expect(await siblings({ DB: stale as unknown as D1Database }, p, "B738", now)).toMatchObject({ source: "live" });
   });
 

@@ -109,7 +109,7 @@ export class Snapshot {
     const row = await this.env.DB.prepare("SELECT ts, n, total FROM type_counts WHERE type = ? ORDER BY ts DESC LIMIT 1")
       .bind(type)
       .first<{ ts: number; n: number; total: number | null }>();
-    const fresh = Math.floor(this.now() / 1000) - SNAPSHOT_MAX_AGE_S - 600;
+    const fresh = Math.floor(this.now() / 1000) - 6 * 3600; // counts stay useful longer than positions
     return row && row.ts >= fresh ? { airborne: row.n, total: row.total ?? row.n, ts: row.ts } : null;
   }
 }

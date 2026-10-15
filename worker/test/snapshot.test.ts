@@ -55,7 +55,7 @@ describe("snapshot", () => {
   });
 
   it("ignores a stale snapshot", async () => {
-    const s = new Snapshot(env(db(NOW - 3 * 3600)), () => NOW * 1000);
+    const s = new Snapshot(env(db(NOW - 7 * 3600)), () => NOW * 1000);
     expect((await s.byHex("A465DF")).ac).toBeNull();
     expect(await s.freshAt()).toBeNull();
     expect(await s.countType("B738")).toBeNull();

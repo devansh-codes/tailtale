@@ -5,8 +5,9 @@ import type { Env } from "./types";
 
 const TEN_MIN = 600;
 const RETENTION_S = 8 * 86400;
-// Counts come from the GitHub Actions snapshot (~every 10 min, sometimes late), so accept up to ~55 minutes.
-const STALE_S = 55 * 60;
+// Counts come from the GitHub Actions snapshot (~every 10 min, but GitHub may run schedules late or skip them).
+// A count is still meaningful for hours, and the page always shows its timestamp.
+const STALE_S = 6 * 3600;
 
 export interface SiblingCount {
   type: string;
