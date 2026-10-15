@@ -102,6 +102,7 @@ export async function runCron(
     env.DB.prepare("DELETE FROM cron_runs WHERE ts < ?").bind(ts - RETENTION_S),
   );
   await env.DB.batch(stmts);
+  console.log(JSON.stringify({ cron, written: rows.length, errors, ms: Date.now() - started }));
   return { written: rows.length, errors };
 }
 
