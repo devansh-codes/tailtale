@@ -90,6 +90,7 @@ export class FakeD1 {
     return stmt;
   }
   select(sql: string, args: unknown[]) {
+    if (sql.includes("FROM live_bucket")) return this.rows.filter((r) => "k" in r && args.includes(r.k));
     if (sql.includes("FROM cron_runs")) return this.rows.filter((r) => "grp" in r);
     if (sql.includes("WHERE type = ?")) {
       return this.rows.filter((r) => r.type === args[0]).sort((a, b) => (b.ts as number) - (a.ts as number));

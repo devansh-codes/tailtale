@@ -40,6 +40,12 @@ export function fmtMins(m: number): string {
   return h ? `${h} h ${mm.toString().padStart(2, "0")} min` : `${mm} min`;
 }
 
+/** "14:20 UTC, 12 min ago" */
+export function asOf(unix: number, now = Date.now()): string {
+  const mins = Math.max(0, Math.round((now / 1000 - unix) / 60));
+  return `${fmtTimeUtc(unix)}, ${mins < 1 ? "just now" : `${mins} min ago`}`;
+}
+
 export function fmtTimeUtc(unix: number): string {
   return new Date(unix * 1000).toISOString().slice(11, 16) + " UTC";
 }

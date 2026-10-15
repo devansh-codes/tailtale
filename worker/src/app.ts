@@ -3,16 +3,21 @@ import { ApiError, cached, errorResponse, json, userAgent, withCors } from "./ht
 import { AdsbFiProvider, AdsbLolProvider, FallbackProvider, type LiveProvider } from "./provider";
 import { resolve } from "./resolve";
 import { allSiblings, lastCron, normalizeType, runCron, siblings, trend } from "./siblings";
+import { Snapshot, SnapshotFirstProvider } from "./snapshot";
 import type { Ctx, Env } from "./types";
 
 export interface Deps {
   provider: LiveProvider;
   fetcher: typeof fetch;
+  snapshot?: Snapshot;
 }
 
 export function defaultDeps(env: Env): Deps {
   const ua = userAgent(env);
-  return { provider: new FallbackProvider(new AdsbLolProvider(ua), new AdsbFiProvider(ua)), fetcher: (...a) => fetch(...a) };
+  const snapshot = new Snapshot(env);
+  // ADSB.lol and adsb.fi refuse most requests from Cloudflare IPs, so the GitHub Actions snapshot in D1 comes first.
+  const live = new FallbackProvider(new AdsbLolProvider(ua, undefined, undefined, 0), new AdsbFiProvider(ua));
+  return { provider: new SnapshotFirstProvider(snapshot, live), fetcher: (...a) => fetch(...a), snapshot };
 }
 
 const HEX = /^[0-9A-Fa-f]{6}$/;
@@ -63,7 +68,8 @@ export async function route(req: Request, env: Env, ctx: Ctx, deps: Deps = defau
     const hex = b.toUpperCase();
     return cached(ctx, `live/${hex}`, 15, async () => {
       const live = await deps.provider.byHex(hex);
-      return json({ hex, live: live && !live.blocked ? live : null, blocked: !!live?.blocked, seen: !!live }, 200, 15);
+      const snapshotAt = deps.snapshot ? await deps.snapshot.freshAt().catch(() => null) : null;
+      return json({ hex, live: live && !live.blocked ? live : null, blocked: !!live?.blocked, seen: !!live, snapshotAt }, 200, 15);
     });
   }
 
@@ -113,14 +119,16 @@ export async function route(req: Request, env: Env, ctx: Ctx, deps: Deps = defau
         return { ok: false, status: 0, ms: Date.now() - t0 };
       }
     };
-    const [adsblol, adsbfi, adsbdb, cron] = await Promise.all([
+    const [adsblol, adsbfi, adsbdb, cron, snapshotAt] = await Promise.all([
       probe("https://api.adsb.lol/v2/hex/000000"),
       probe("https://opendata.adsb.fi/api/v2/hex/000000"),
       probe("https://api.adsbdb.com/v0/callsign/UAL1"),
       lastCron(env).catch(() => null),
+      deps.snapshot ? deps.snapshot.freshAt().catch(() => null) : Promise.resolve(null),
     ]);
     return json({
-      ok: (adsblol.ok || adsbfi.ok) && adsbdb.ok,
+      ok: (snapshotAt !== null || adsblol.ok || adsbfi.ok) && adsbdb.ok,
+      snapshotAt,
       upstreams: { "adsb.lol": adsblol, "adsb.fi": adsbfi, adsbdb },
       lastCron: cron,
       provider: deps.provider.name,

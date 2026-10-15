@@ -5,14 +5,15 @@ import type { Env } from "./types";
 
 const TEN_MIN = 600;
 const RETENTION_S = 8 * 86400;
-const STALE_S = 30 * 60;
+// Counts come from the GitHub Actions snapshot (~every 10 min, sometimes late), so accept up to ~55 minutes.
+const STALE_S = 55 * 60;
 
 export interface SiblingCount {
   type: string;
   airborne: number;
   total: number | null;
   ts: number;
-  source: "cron" | "live";
+  source: "snapshot" | "live";
 }
 
 export function normalizeType(t: string): string {
@@ -27,7 +28,7 @@ export async function siblings(env: Env, provider: LiveProvider, type: string, n
     const row = await env.DB.prepare("SELECT ts, n, total FROM type_counts WHERE type = ? ORDER BY ts DESC LIMIT 1")
       .bind(type)
       .first<{ ts: number; n: number; total: number | null }>();
-    if (row && ts - row.ts < STALE_S) return { type, airborne: row.n, total: row.total, ts: row.ts, source: "cron" };
+    if (row && ts - row.ts < STALE_S) return { type, airborne: row.n, total: row.total, ts: row.ts, source: "snapshot" };
   }
   const c = await provider.countType(type);
   return { type, airborne: c.airborne, total: c.total, ts, source: "live" };

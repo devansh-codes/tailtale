@@ -15,8 +15,9 @@ database_id = "b1ec9515-0c58-44f6-8e00-8d58716d2064"
 migrations_dir = "migrations"
 
 [triggers]
-# Four groups of tracked types, one minute apart, each every 10 minutes (10 ms CPU per invocation).
-crons = ["0-59/10 * * * *", "1-59/10 * * * *", "2-59/10 * * * *", "3-59/10 * * * *"]
+# Retired: ADSB.lol refuses Cloudflare egress IPs, so .github/workflows/live.yml (GitHub Actions, every ~10 min)
+# writes the type counts and the live snapshot to D1 instead. runCron() remains for if that ever changes.
+crons = []
 
 [observability]
 enabled = true

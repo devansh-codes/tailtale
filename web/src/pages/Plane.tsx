@@ -5,7 +5,7 @@ import { LazyMap } from "../components/LazyMap";
 import type { MapPoint } from "../components/MapView";
 import { HeroPhoto } from "../components/Photo";
 import { Card, Skeleton, SkeletonStats, Stat } from "../components/ui";
-import { age, fmtDate, fmtDay, fmtInt, fmtMins, ownerLabel, pluralModel, summarize, typeName } from "../format";
+import { age, asOf, fmtDate, fmtDay, fmtInt, fmtMins, ownerLabel, pluralModel, summarize, typeName } from "../format";
 import { historyState, Link, useTitle } from "../router";
 import { drawCard, shareOrDownload, type CardData } from "../shareCard";
 import { silhouetteKind } from "../silhouette";
@@ -128,7 +128,9 @@ export function Plane({ hex }: { hex: string }) {
         </Card>
       )}
 
-      {!blocked && <RightNow live={liveAc} loading={live.loading} error={live.error} route={route.data} routeLoading={route.loading} />}
+      {!blocked && (
+        <RightNow live={liveAc} loading={live.loading} error={live.error} route={route.data} routeLoading={route.loading} snapshotAt={live.data?.snapshotAt ?? null} />
+      )}
 
       {(icaoType || live.loading || hist.loading) && (
         <Card title="Siblings in the sky" busy={sib.loading || !icaoType}>
@@ -142,7 +144,7 @@ export function Plane({ hex }: { hex: string }) {
               </p>
               <p className="muted small" style={{ marginTop: 4 }}>
                 Worldwide aircraft of ICAO type {icaoType} seen airborne by ADSB.lol volunteer receivers
-                {sib.data.source === "cron" ? " in the latest 10-minute count" : " just now"}. Source: ADSB.lol.
+                {sib.data.source === "snapshot" ? ` in the latest count (${asOf(sib.data.ts)})` : " just now"}. Source: ADSB.lol.
               </p>
               {trend.data && trend.data.points.length > 1 && (
                 <div style={{ marginTop: 12 }}>
@@ -246,12 +248,13 @@ function VitalStats({ loading, us, rec, info, plainType }: {
   );
 }
 
-function RightNow({ live, loading, error, route, routeLoading }: {
+function RightNow({ live, loading, error, route, routeLoading, snapshotAt }: {
   live: LiveAircraft | null;
   loading: boolean;
   error: Error | null;
   route: Awaited<ReturnType<typeof api.route>> | null;
   routeLoading: boolean;
+  snapshotAt: number | null;
 }) {
   const points = useMemo<MapPoint[]>(() => {
     if (!live || live.lat == null || live.lon == null) return [];
@@ -295,8 +298,9 @@ function RightNow({ live, loading, error, route, routeLoading }: {
       <Card title="Right now">
         <p className="lede">Not transmitting right now.</p>
         <p className="muted" style={{ marginTop: 4 }}>
-          No ADS-B receiver in the volunteer network has heard it in the last minute. It's probably parked with its transponder off, or outside
-          receiver coverage.
+          {snapshotAt
+            ? `It isn't in our latest live snapshot (${asOf(snapshotAt)}). It's probably parked with its transponder off, outside receiver coverage, or not one of the 40 airliner types we snapshot.`
+            : "No ADS-B receiver in the volunteer network has heard it in the last minute. It's probably parked with its transponder off, or outside receiver coverage."}
         </p>
       </Card>
     );
@@ -305,9 +309,7 @@ function RightNow({ live, loading, error, route, routeLoading }: {
     return (
       <Card title="Right now">
         <p className="lede">On the ground{live.callsign ? ` as ${live.callsign}` : ""}.</p>
-        <p className="muted small" style={{ marginTop: 4 }}>
-          Source: {net(live)} live data{live.posAge != null ? `, position ${Math.round(live.posAge)} s old` : ""}.
-        </p>
+        <p className="muted small" style={{ marginTop: 4 }}>{freshness(live)}</p>
         {points.length > 0 && <LazyMap points={points} label="Map of the aircraft's current position on the ground" />}
       </Card>
     );
@@ -336,6 +338,9 @@ function RightNow({ live, loading, error, route, routeLoading }: {
           )}
         </div>
       )}
+      <p className="muted small" style={{ marginBottom: 10 }}>
+        {freshness(live)}
+      </p>
       <div className="stats">
         <Stat label="Altitude" value={live.alt != null ? `${fmtInt(live.alt)} ft` : null} source={`${net(live)} (barometric)`} />
         <Stat label="Ground speed" value={live.gs != null ? `${fmtInt(Math.round(live.gs))} kt` : null} source={net(live)} />
@@ -352,6 +357,10 @@ function RightNow({ live, loading, error, route, routeLoading }: {
   );
 }
 
+const freshness = (l: LiveAircraft) =>
+  l.asOf
+    ? `Position as of ${asOf(l.asOf)}, from our 10-minute snapshot of ${net(l)} data.`
+    : `Source: ${net(l)} live data${l.posAge != null ? `, position ${Math.round(l.posAge)} s old` : ""}.`;
 const net = (l: LiveAircraft) => (l.provider === "adsb.fi" ? "adsb.fi" : "ADSB.lol");
 const cs = (l: LiveAircraft) => !!l.callsign && AIRLINE_CS.test(l.callsign);
 

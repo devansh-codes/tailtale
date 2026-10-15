@@ -69,6 +69,8 @@ export interface LiveAircraft {
   blocked: boolean;
   /** Live network that answered: "adsb.lol" or "adsb.fi". */
   provider?: string;
+  /** Set when the data comes from the ~10-minute snapshot (unix seconds). */
+  asOf?: number;
 }
 
 export interface LiveResponse {
@@ -76,6 +78,8 @@ export interface LiveResponse {
   live: LiveAircraft | null;
   blocked: boolean;
   seen: boolean;
+  /** Time of the latest live snapshot the server had (unix seconds), if any. */
+  snapshotAt?: number | null;
 }
 
 export interface Resolved {
@@ -111,7 +115,7 @@ export interface Siblings {
   airborne: number;
   total: number | null;
   ts: number;
-  source: "cron" | "live";
+  source: "snapshot" | "live";
 }
 
 export interface AircraftInfo {

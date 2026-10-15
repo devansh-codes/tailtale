@@ -267,7 +267,7 @@ describe("HTTP API", () => {
     const deps = { provider: p, fetcher: fakeFetch({}) };
     const e = env({ DB: db as unknown as D1Database });
     const tracked = await handleRequest(new Request("https://x/api/siblings/b738"), e, ctx(), deps);
-    expect(await tracked.json()).toMatchObject({ type: "B738", airborne: 214, source: "cron" });
+    expect(await tracked.json()).toMatchObject({ type: "B738", airborne: 214, source: "snapshot" });
     const untracked = await handleRequest(new Request("https://x/api/siblings/C172"), e, ctx(), deps);
     expect(await untracked.json()).toMatchObject({ type: "C172", airborne: 400, source: "live" });
     expect(p.calls).toEqual(["type:C172"]);

@@ -36,6 +36,8 @@ export interface LiveAircraft {
   blocked: boolean;
   /** Which live network answered ("adsb.lol" or "adsb.fi"), for attribution on the page. */
   provider: string;
+  /** Present when the data comes from the ~10-minute snapshot: unix seconds it was taken. */
+  asOf?: number;
 }
 
 export interface TypeCount {

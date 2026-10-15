@@ -1,7 +1,7 @@
 import { type FormEvent, useState } from "react";
 import { api, FetchError } from "../api";
 import { Card, Skeleton } from "../components/ui";
-import { fmtInt, pluralModel } from "../format";
+import { asOf, fmtInt, pluralModel } from "../format";
 import { navigate, useTitle } from "../router";
 import { typeLabel } from "../typeNames";
 import { useLoad } from "../useLoad";
@@ -115,7 +115,7 @@ export function Home() {
         </h2>
         <p className="sub">
           {top.length
-            ? `Across ${Object.keys(sib.data!.types).length} of the 40 airliner types we count every 10 minutes from volunteer ADS-B receivers.`
+            ? `Across the ${Object.keys(sib.data!.types).length} airliner types we count about every 10 minutes from volunteer ADS-B receivers${sib.data!.ts ? ` (latest ${asOf(sib.data!.ts)})` : ""}.`
             : sib.loading
               ? "Counting the sky…"
               : "Live counts are warming up. Check back in a few minutes."}
