@@ -518,6 +518,11 @@ main {
     background: linear-gradient(180deg, #06352f 0%, #12241f 100%);
   }
 }
+.hero-media > a {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
 .hero-media img {
   width: 100%;
   height: 100%;
